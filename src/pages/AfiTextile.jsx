@@ -1,0 +1,83 @@
+import React, { useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faShirt, faShoppingCart, faSearch, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+import { useCart } from '../context/CartContext';
+
+function AfiTextile() {
+  const { addItem } = useCart();
+  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  const products = [
+    { id: 10, name: 'Robe Cérémonie', price: 65000, category: 'pagne', icon: '👘', desc: 'Robe en pagne teint main', popularity: 56 },
+    { id: 11, name: 'Ensemble Pagne Teint', price: 45000, category: 'pagne', icon: '🥻', desc: 'Ensemble complet femme', popularity: 48 },
+    { id: 12, name: 'Faso Dan Fani', price: 18000, category: 'tissu', icon: '🎨', desc: 'Tissu traditionnel au mètre', popularity: 89 },
+    { id: 13, name: 'Coussin Tissé', price: 25000, category: 'deco', icon: '🛋️', desc: 'Coussin décoratif fait main', popularity: 34 },
+    { id: 14, name: 'Rideau Macramé', price: 45000, category: 'deco', icon: '🚪', desc: 'Rideau en macramé sur mesure', popularity: 23 },
+    { id: 15, name: 'Corsage Pagne Brut', price: 28000, category: 'pagne', icon: '👚', desc: 'Corsage élégant en pagne', popularity: 42 }
+  ];
+
+  const filteredByCategory = filter === 'all' ? products : products.filter(p => p.category === filter);
+  const filteredProducts = searchTerm === '' 
+    ? filteredByCategory 
+    : filteredByCategory.filter(p => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.desc.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+  return (
+    <>
+      <Helmet><title>AFI Textile - Pagnes & Tissus | AFI Collection</title></Helmet>
+      <div className="bg-gradient-to-r from-afi-green to-afi-greenDark rounded-b-3xl">
+        <div className="max-w-7xl mx-auto px-4 py-10">
+          <div className="text-center">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-1.5 rounded-full mb-4"><FontAwesomeIcon icon={faShirt} className="text-sm text-white" /><span className="text-xs font-medium text-white">AFI Textile</span></div>
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-white mb-2">Pagnes, Tissus & Décoration</h1>
+              <p className="text-white/80 text-sm max-w-md mx-auto">Teinture artisanale, tissage Faso Dan Fani et décoration intérieure africaine authentique.</p>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <div className="relative max-w-md mx-auto">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><FontAwesomeIcon icon={faSearch} className="text-gray-400 text-sm" /></div>
+            <input type="text" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher un produit..." className="w-full pl-11 pr-10 py-2.5 rounded-xl bg-white text-gray-700 placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-afi-green shadow-md" />
+            {searchTerm && (<button onClick={() => setSearchTerm('')} className="absolute inset-y-0 right-0 pr-4 flex items-center"><FontAwesomeIcon icon={faTimes} className="text-gray-400 hover:text-gray-600 text-sm" /></button>)}
+          </div>
+          {searchTerm && (<p className="text-center text-sm text-gray-500 mt-2">{filteredProducts.length} résultat{filteredProducts.length > 1 ? 's' : ''} trouvé{filteredProducts.length > 1 ? 's' : ''}</p>)}
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <button onClick={() => setFilter('all')} className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === 'all' ? 'bg-afi-green text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-afi-green/10'}`}>Tout</button>
+          <button onClick={() => setFilter('pagne')} className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === 'pagne' ? 'bg-afi-green text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-afi-green/10'}`}>Pagnes & Vêtements</button>
+          <button onClick={() => setFilter('tissu')} className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === 'tissu' ? 'bg-afi-green text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-afi-green/10'}`}>Tissus au mètre</button>
+          <button onClick={() => setFilter('deco')} className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === 'deco' ? 'bg-afi-green text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-afi-green/10'}`}>Décoration</button>
+        </div>
+        
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-16"><div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-3"><FontAwesomeIcon icon={faShirt} className="text-2xl text-gray-400" /></div><p className="text-gray-500">Aucun produit trouvé</p></div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.map((product, index) => (
+              <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+                <div className="relative h-48 flex items-center justify-center text-6xl bg-gradient-to-br from-gray-50 to-gray-100">{product.icon}</div>
+                <div className="p-5"><h3 className="font-serif text-xl font-bold text-gray-800 mb-1">{product.name}</h3><p className="text-gray-500 text-sm mb-3">{product.desc}</p>
+                <div className="flex justify-between items-center mb-4"><span className="font-mono text-afi-green font-bold text-lg">{product.price.toLocaleString('fr-FR')} FCFA</span>
+                <div className="flex items-center gap-1 text-xs text-gray-400"><FontAwesomeIcon icon={faShoppingCart} className="text-afi-green" /> {product.popularity}</div></div>
+                <div className="flex gap-3"><button onClick={() => addItem({ id: product.id, name: product.name, price: product.price })} className="flex-1 bg-afi-green text-white py-2 rounded-lg font-semibold text-sm hover:bg-afi-greenDark transition-all">Ajouter au panier</button>
+                <a href="https://wa.me/2290196062287" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-green-500 text-white rounded-lg flex items-center justify-center hover:bg-green-600 transition-all"><FontAwesomeIcon icon={faWhatsapp} /></a></div></div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default AfiTextile;

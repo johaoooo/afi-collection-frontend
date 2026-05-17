@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fallback CSS natif pour le dark mode - contourne les problèmes de génération Tailwind */
+@layer base {
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark body {
+    background-color: #1e2433;
+    color: white;
+  }
+
+  html.dark #root > div {
+    background-color: #1e2433;
+  }
+  
+  /* Améliore le contraste des liens en mode sombre */
+  html.dark a:not([class*="text-"]) {
+    color: #e5e7eb;
+  }
+  
+  html.dark button:not([class*="text-"]) {
+    color: #e5e7eb;
+  }
+}
+
+/* Styles additionnels pour garantir la lisibilité en mode sombre */
+html.dark .card-white,
+html.dark .bg-white {
+  background-color: #2a3346 !important;
+}
+
+html.dark .text-gray-600,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+  color: #9ca3af !important;
+}
