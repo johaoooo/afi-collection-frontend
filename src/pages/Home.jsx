@@ -17,6 +17,11 @@ import {
 import AnimatedSection from '../components/AnimatedSection';
 import CountUp from '../components/CountUp';
 
+// Import des images locales
+import afiImage from '../assets/afi.jpeg';
+import afi2Image from '../assets/afi2.jpeg';
+import afi7Image from '../assets/afi7.jpeg';
+
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
@@ -26,24 +31,24 @@ function Home() {
     {
       title: "AFI Collection",
       subtitle: "Tisser l'avenir, valoriser le local",
-      description: "Découvrez nos créations uniques alliant savoir-faire ancestral et design contemporain.",
-      bgColor: "from-afi-green/30 to-afi-green/10",
+      description: "",
+      image: afiImage,
       cta: "Découvrir",
       link: "/afisac"
     },
     {
       title: "AFI Collection",
       subtitle: "Tisser l'avenir, valoriser le local",
-      description: "Mme TOSSA Afiavi a dédié sa vie à l'artisanat béninois, formant plus de 500 artisans.",
-      bgColor: "from-afi-yellow/30 to-afi-yellow/10",
+      description: "",
+      image: afi2Image,
       cta: "Découvrir notre histoire",
       link: "/fondatrice"
     },
     {
       title: "AFI Collection",
       subtitle: "Tisser l'avenir, valoriser le local",
-      description: "Des formations certifiantes pour les femmes et les jeunes dans l'artisanat et l'agroalimentaire.",
-      bgColor: "from-afi-red/30 to-afi-red/10",
+      description: "",
+      image: afi7Image,
       cta: "S'inscrire",
       link: "/cfp-dorcas"
     }
@@ -121,10 +126,10 @@ function Home() {
     <>
       <Helmet><title>AFI Collection - Artisanat béninois d'exception</title></Helmet>
 
-      {/* Hero Slideshow - responsive */}
+      {/* Hero Slideshow avec images locales - sans texte de description */}
       <div className="w-full px-2 sm:px-4 pt-2">
         <div className="w-full rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
-          <div className="relative min-h-[60vh] sm:min-h-[85vh] md:min-h-[80vh] flex items-center justify-center">
+          <div className="relative min-h-[60vh] sm:min-h-[85vh] md:min-h-[80vh]">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
@@ -132,22 +137,29 @@ function Home() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -100 }}
                 transition={{ duration: 0.5 }}
-                className={`w-full h-full bg-gradient-to-br ${slides[currentSlide].bgColor} flex items-center justify-center absolute inset-0`}
+                className="absolute inset-0"
               >
-                <div className="text-center px-4 max-w-3xl mx-auto">
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="inline-block px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-[8px] sm:text-xs mb-2 sm:mb-4 tracking-wide">AFI Collection</motion.div>
-                  <motion.h1 initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-4"><span className="text-afi-green">AFI</span> Collection</motion.h1>
-                  <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="text-afi-green italic text-sm sm:text-lg md:text-xl lg:text-2xl mb-2 sm:mb-4 font-serif">« {slides[currentSlide].subtitle} »</motion.p>
-                  <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="text-gray-800 dark:text-gray-200 mb-4 sm:mb-6 md:mb-8 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">{slides[currentSlide].description}</motion.p>
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6 }}>
-                    <Link to={slides[currentSlide].link} className="inline-block bg-afi-green text-white px-4 sm:px-6 md:px-8 py-1.5 sm:py-2.5 md:py-3 rounded-xl font-semibold hover:bg-afi-green-dark transition-all transform hover:scale-105 shadow-lg text-xs sm:text-sm md:text-base">{slides[currentSlide].cta} →</Link>
-                  </motion.div>
+                <div 
+                  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                  style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
+                >
+                  <div className="absolute inset-0 bg-black/50"></div>
+                </div>
+                <div className="relative z-10 h-full flex items-center justify-center">
+                  <div className="text-center px-4 max-w-3xl mx-auto">
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="inline-block px-2 sm:px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-[8px] sm:text-xs mb-2 sm:mb-4 tracking-wide">AFI Collection</motion.div>
+                    <motion.h1 initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 sm:mb-4"><span className="text-afi-green">AFI</span> Collection</motion.h1>
+                    <motion.p initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="text-afi-yellow italic text-sm sm:text-lg md:text-xl lg:text-2xl mb-4 sm:mb-6 font-serif">« {slides[currentSlide].subtitle} »</motion.p>
+                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6 }}>
+                      <Link to={slides[currentSlide].link} className="inline-block bg-afi-green text-white px-4 sm:px-6 md:px-8 py-1.5 sm:py-2.5 md:py-3 rounded-xl font-semibold hover:bg-afi-green-dark transition-all transform hover:scale-105 shadow-lg text-xs sm:text-sm md:text-base">{slides[currentSlide].cta} →</Link>
+                    </motion.div>
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
             
             <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center gap-2 sm:gap-3 z-10">
-              {slides.map((_, index) => (<button key={index} onClick={() => setCurrentSlide(index)} className={`transition-all ${currentSlide === index ? 'w-4 sm:w-8 h-1 sm:h-1.5 bg-afi-green' : 'w-1 sm:w-1.5 h-1 sm:h-1.5 bg-gray-400'} rounded-full`} />))}
+              {slides.map((_, index) => (<button key={index} onClick={() => setCurrentSlide(index)} className={`transition-all ${currentSlide === index ? 'w-4 sm:w-8 h-1 sm:h-1.5 bg-afi-green' : 'w-1 sm:w-1.5 h-1 sm:h-1.5 bg-white/50'} rounded-full`} />))}
             </div>
             
             <button onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)} className="absolute left-1 sm:left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition-all z-10"><FontAwesomeIcon icon={faChevronLeft} className="text-xs sm:text-sm md:text-base text-gray-800" /></button>
@@ -156,26 +168,24 @@ function Home() {
         </div>
       </div>
 
-      {/* Section Chiffres Clés - responsive largeur pleine */}
-      <div className="w-full px-2 sm:px-4 -mt-12 sm:-mt-16 md:-mt-20 relative z-20">
-        <div className="bg-gradient-to-r from-afi-green to-afi-green-dark rounded-2xl sm:rounded-3xl py-6 sm:py-10 md:py-12 px-3 sm:px-6 shadow-2xl">
-          <div className="text-center mb-4 sm:mb-6 md:mb-8">
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-2"><FontAwesomeIcon icon={faChartSimple} className="text-white/80 text-sm sm:text-lg" /><h2 className="font-serif text-lg sm:text-2xl md:text-3xl font-bold text-white">AFI Collection en chiffres</h2></div>
-            <p className="text-white/80 text-xs sm:text-sm md:text-base">Une communauté qui grandit chaque jour</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 md:gap-6">
+      {/* Section Chiffres Clés - style uniforme vert */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 md:-mt-24 relative z-20">
+        <div className="bg-afi-green rounded-2xl sm:rounded-3xl py-4 sm:py-6 md:py-8 px-3 sm:px-4 shadow-xl">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-4">
             {chiffres.map((c, i) => (
               <div key={i} className="text-center">
-                <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-white/20 rounded-full mb-1 sm:mb-2 md:mb-3"><FontAwesomeIcon icon={c.icon} className="text-white text-sm sm:text-base md:text-xl" /></div>
-                <CountUp target={c.valeur} suffix={c.suffix} />
-                <div className="font-mono text-[8px] sm:text-[9px] md:text-[10px] text-white/70 tracking-wider mt-0.5 sm:mt-1">{c.label}</div>
+                <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full mb-1 sm:mb-2">
+                  <FontAwesomeIcon icon={c.icon} className="text-white text-xs sm:text-sm" />
+                </div>
+                <div className="text-white font-serif font-bold text-sm sm:text-base md:text-lg">{c.valeur}{c.suffix}</div>
+                <div className="font-mono text-[8px] sm:text-[9px] text-white/80 tracking-wider mt-0.5">{c.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Section Sous-marques - responsive */}
+      {/* Section Sous-marques */}
       <AnimatedSection direction="up">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16">
           <div className="text-center mb-6 sm:mb-8 md:mb-12">
