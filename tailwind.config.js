@@ -5,19 +5,6 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  // Force la génération des classes critiques
-  safelist: [
-    'dark',
-    'bg-afi-dark-bg',
-    'bg-afi-dark-card',
-    'dark:bg-afi-dark-bg',
-    'dark:bg-afi-dark-card',
-    'dark:bg-afi-dark-border',
-    'dark:text-white',
-    'dark:text-gray-200',
-    'dark:text-gray-300',
-    'dark:border-afi-dark-border',
-  ],
   theme: {
     extend: {
       colors: {
@@ -26,10 +13,10 @@ export default {
           'green-dark': '#005c38',
           yellow: '#FCD116',
           red: '#E8112D',
-          cream: '#f5f0e8',
           'dark-bg': '#1e2433',
           'dark-card': '#2a3346',
           'dark-border': '#3a4558',
+          cream: '#f5f0e8',
         }
       },
       fontFamily: {

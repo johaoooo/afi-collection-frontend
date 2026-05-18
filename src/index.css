@@ -1,40 +1,157 @@
+@import url('https://fonts.googleapis.com/css2?family=Calibri:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Fallback CSS natif pour le dark mode - contourne les problèmes de génération Tailwind */
 @layer base {
-  html.dark {
-    color-scheme: dark;
+  body {
+    background-color: #e8ecef;
+    color: #1a1a2e;
+    font-family: 'Calibri', 'Segoe UI', sans-serif;
   }
-
-  html.dark body {
+  
+  .dark body {
     background-color: #1e2433;
+    color: #e8e8e8;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    background-color: #008753;
+    color: white;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-family: 'Calibri', 'Segoe UI', sans-serif;
+    font-weight: 600;
+    transition-property: all;
+    transition-duration: 300ms;
+  }
+  
+  .btn-primary:hover {
+    background-color: #005c38;
+  }
+  
+  .btn-secondary {
+    border-width: 2px;
+    border-color: #008753;
+    color: #008753;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    font-family: 'Calibri', 'Segoe UI', sans-serif;
+    font-weight: 600;
+    transition-property: all;
+    transition-duration: 300ms;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #008753;
     color: white;
   }
+}
 
-  html.dark #root > div {
-    background-color: #1e2433;
+/* Glassmorphism effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-text {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.dark .glass-text {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-  
-  /* Améliore le contraste des liens en mode sombre */
-  html.dark a:not([class*="text-"]) {
-    color: #e5e7eb;
-  }
-  
-  html.dark button:not([class*="text-"]) {
-    color: #e5e7eb;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Styles additionnels pour garantir la lisibilité en mode sombre */
-html.dark .card-white,
-html.dark .bg-white {
-  background-color: #2a3346 !important;
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
 }
 
-html.dark .text-gray-600,
-html.dark .text-gray-500,
-html.dark .text-gray-400 {
-  color: #9ca3af !important;
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  h1 {
+    font-size: 2rem !important;
+  }
+  
+  .grid {
+    gap: 1rem !important;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Bordures épaisses pour les cartes */
+.border-thick {
+  border-width: 2px;
+}
+
+/* Cartes en mode clair - bordure verte épaisse */
+html:not(.dark) .bg-white.rounded-xl,
+html:not(.dark) .bg-white.rounded-2xl,
+html:not(.dark) .bg-white.rounded-lg,
+html:not(.dark) .bg-white.rounded-3xl {
+  border: 2px solid #008753 !important;
+}
+
+/* Cartes en mode sombre - bordure grise épaisse */
+html.dark .bg-white,
+html.dark .bg-afi-dark-card {
+  border: 2px solid #3a4558 !important;
+}
+
+/* Cartes des sous-marques gardent leur bordure blanche */
+.group.relative.bg-gradient-to-br {
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Cartes des témoignages */
+.bg-white.dark\:bg-afi-dark-card.rounded-xl {
+  border: 2px solid #008753 !important;
+}
+
+html.dark .bg-white.dark\:bg-afi-dark-card.rounded-xl {
+  border: 2px solid #3a4558 !important;
 }
