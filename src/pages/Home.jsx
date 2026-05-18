@@ -12,7 +12,9 @@ import {
   faHandsHelping, faUserGraduate, faCamera, faPlay, faPause,
   faArrowRight, faCheckCircle, faBuilding, faGraduationCap,
   faBagShopping, faShirt, faChartSimple, faChartColumn,
-  faComments, faImage, faBullhorn
+  faComments, faImage, faBullhorn,
+  // Icônes pro pour les sous-marques
+  faBriefcase, faSackDollar, faHatCowboy, faIndustry
 } from '@fortawesome/free-solid-svg-icons';
 import AnimatedSection from '../components/AnimatedSection';
 import CountUp from '../components/CountUp';
@@ -106,11 +108,51 @@ function Home() {
   ];
 
   const brands = [
-    { name: 'AFISAC', code: 'Sacs & Chaussures', desc: 'Créations en macramé et pagne.', price: '15 000 — 40 000 FCFA', icon: '👜', path: '/afisac', stats: '25+ modèles', color: 'from-emerald-500 to-teal-600' },
-    { name: 'AFI Textile', code: 'Pagnes & Tissus', desc: 'Teinture artisanale, tissage traditionnel.', price: '10 000 — 80 000 FCFA', icon: '🧵', path: '/afi-textile', stats: '50+ tissus', color: 'from-blue-500 to-indigo-600' },
-    { name: 'AFI Mode', code: 'Accessoires', desc: 'Bijoux, ceintures, accessoires tendance.', price: '5 000 — 20 000 FCFA', icon: '💎', path: '/afi-mode', stats: '100+ créations', color: 'from-purple-500 to-pink-600' },
-    { name: 'Agroalimentaire', code: 'Farines & Dérivés', desc: 'Soja et sésame 100% béninois.', price: 'Sachets 250g — 1kg', icon: '🌿', path: '/agroalimentaire', stats: '10+ produits', color: 'from-lime-500 to-green-600' },
-    { name: 'CFP Dorcas', code: 'Centre de Formation', desc: '4 filières certifiantes.', price: '50 000 — 150 000 FCFA', icon: '🎓', path: '/cfp-dorcas', stats: '200+ diplômées', color: 'from-orange-500 to-red-600' }
+    { 
+      name: 'AFISAC', 
+      code: 'Sacs & Chaussures', 
+      desc: 'Créations en macramé et pagne, confectionnées à la main selon les techniques traditionnelles béninoises.', 
+      price: '15 000 — 40 000 FCFA', 
+      icon: faBagShopping,
+      path: '/afisac', 
+      stats: '25+ modèles' 
+    },
+    { 
+      name: 'AFI Textile', 
+      code: 'Pagnes & Tissus', 
+      desc: 'Teinture artisanale, tissage Faso Dan Fani et décoration intérieure africaine authentique.', 
+      price: '10 000 — 80 000 FCFA', 
+      icon: faShirt,
+      path: '/afi-textile', 
+      stats: '50+ tissus' 
+    },
+    { 
+      name: 'AFI Mode', 
+      code: 'Accessoires', 
+      desc: 'Bijoux tissés, ceintures et accessoires tendance — 100% faits main avec une touche africaine.', 
+      price: '5 000 — 20 000 FCFA', 
+      icon: faGem,
+      path: '/afi-mode', 
+      stats: '100+ créations' 
+    },
+    { 
+      name: 'Agroalimentaire', 
+      code: 'Farines & Dérivés', 
+      desc: 'Soja et sésame 100% béninois, transformés en produits alimentaires sains et nutritifs.', 
+      price: 'Sachets 250g — 1kg', 
+      icon: faSeedling,
+      path: '/agroalimentaire', 
+      stats: '10+ produits' 
+    },
+    { 
+      name: 'CFP Dorcas', 
+      code: 'Centre de Formation', 
+      desc: '4 filières certifiantes pour femmes et jeunes dans l\'artisanat et l\'agroalimentaire.', 
+      price: '50 000 — 150 000 FCFA', 
+      icon: faGraduationCap,
+      path: '/cfp-dorcas', 
+      stats: '200+ diplômées' 
+    }
   ];
 
   const actualites = [
@@ -144,7 +186,6 @@ function Home() {
                     <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2 }} className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full mb-4 sm:mb-6 bg-white/20 backdrop-blur-sm">
                       <span className="text-white/90 text-[10px] sm:text-xs tracking-wide font-medium">Depuis 2015</span>
                     </motion.div>
-                    
                     <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
                       <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 sm:mb-5 tracking-wide">
                         <span className="text-afi-green drop-shadow-lg">AFI</span>
@@ -163,35 +204,33 @@ function Home() {
                 </div>
               </motion.div>
             </AnimatePresence>
-            
             <div className="absolute bottom-4 sm:bottom-6 left-0 right-0 flex justify-center gap-2 sm:gap-3 z-10">
               {slides.map((_, index) => (<button key={index} onClick={() => setCurrentSlide(index)} className={`transition-all ${currentSlide === index ? 'w-6 sm:w-8 h-1 sm:h-1.5 bg-afi-green' : 'w-1.5 sm:w-2 h-1 sm:h-1.5 bg-white/50'} rounded-full`} />))}
             </div>
-            
             <button onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center shadow-lg transition-all z-10 border border-white/30"><FontAwesomeIcon icon={faChevronLeft} className="text-white text-sm sm:text-base md:text-lg" /></button>
             <button onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 flex items-center justify-center shadow-lg transition-all z-10 border border-white/30"><FontAwesomeIcon icon={faChevronRight} className="text-white text-sm sm:text-base md:text-lg" /></button>
           </div>
         </div>
       </div>
 
-      {/* Section Chiffres Clés - sur une seule ligne sur mobile */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 -mt-16 sm:-mt-20 md:-mt-24 relative z-20">
-        <div className="bg-afi-green rounded-2xl sm:rounded-3xl py-4 sm:py-6 md:py-8 px-3 sm:px-4 shadow-xl overflow-x-auto">
-          <div className="flex flex-row justify-around min-w-[500px] sm:min-w-0 sm:grid sm:grid-cols-5 gap-4 sm:gap-6">
+      {/* Section Chiffres Clés */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-12 sm:-mt-16 md:-mt-20 relative z-20">
+        <div className="bg-gradient-to-r from-afi-green to-afi-green-dark rounded-2xl sm:rounded-3xl py-3 sm:py-4 px-4 sm:px-6 shadow-xl">
+          <div className="flex flex-row justify-around items-center gap-2 sm:gap-4 overflow-x-auto">
             {chiffres.map((c, i) => (
-              <div key={i} className="text-center flex-1">
-                <div className="inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-white/20 rounded-full mb-2">
-                  <FontAwesomeIcon icon={c.icon} className="text-white text-base sm:text-lg md:text-2xl" />
+              <div key={i} className="text-center flex-shrink-0 min-w-[70px] sm:min-w-0">
+                <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-11 md:h-11 bg-white/20 rounded-full mb-1 sm:mb-2">
+                  <FontAwesomeIcon icon={c.icon} className="text-white text-xs sm:text-sm md:text-base" />
                 </div>
-                <div className="text-white font-serif font-bold text-base sm:text-lg md:text-2xl">{c.valeur}{c.suffix}</div>
-                <div className="font-mono text-[9px] sm:text-[10px] md:text-xs text-white/80 tracking-wider mt-1 whitespace-nowrap">{c.label}</div>
+                <div className="text-white font-serif font-bold text-sm sm:text-base md:text-lg">{c.valeur}{c.suffix}</div>
+                <div className="font-mono text-[8px] sm:text-[9px] md:text-[10px] text-white/70 tracking-wider mt-0.5 whitespace-nowrap">{c.label}</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Section Sous-marques */}
+      {/* Section Sous-marques - Cartes avec icônes pro */}
       <AnimatedSection direction="up">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16">
           <div className="text-center mb-6 sm:mb-8 md:mb-12">
@@ -203,18 +242,49 @@ function Home() {
             </div>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">Cinq univers complémentaires pour valoriser le savoir-faire béninois.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8">
             {brands.map((brand, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -10 }} className={`group relative bg-gradient-to-br ${brand.color} rounded-xl sm:rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer border border-white/20`}>
+              <motion.div 
+                key={i} 
+                initial={{ opacity: 0, y: 50 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ delay: i * 0.1 }} 
+                whileHover={{ y: -10, scale: 1.02 }} 
+                className="group relative bg-white dark:bg-afi-dark-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-afi-green dark:border-afi-dark-border"
+              >
                 <Link to={brand.path}>
-                  <div className="absolute top-0 right-0 w-20 sm:w-24 md:w-32 h-20 sm:h-24 md:h-32 bg-white/10 rounded-bl-full"></div>
-                  <div className="p-4 sm:p-5 md:p-6">
-                    <div className="flex justify-between items-start mb-3 sm:mb-4">
-                      <motion.div whileHover={{ rotate: 10, scale: 1.1 }} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm"><span className="text-3xl sm:text-4xl">{brand.icon}</span></motion.div>
-                      <div className="bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-0.5 sm:py-1 rounded-full"><span className="text-[10px] sm:text-xs font-semibold text-white">{brand.stats}</span></div>
+                  {/* En-tête vert avec icône pro */}
+                  <div className="bg-gradient-to-r from-afi-green to-afi-green-dark px-5 sm:px-6 py-4 sm:py-5">
+                    <div className="flex justify-between items-center">
+                      <motion.div 
+                        whileHover={{ rotate: 10, scale: 1.1 }} 
+                        className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"
+                      >
+                        <FontAwesomeIcon icon={brand.icon} className="text-white text-2xl sm:text-3xl" />
+                      </motion.div>
+                      <div className="bg-white/20 backdrop-blur-sm px-2.5 sm:px-3 py-1 rounded-full">
+                        <span className="text-[10px] sm:text-xs font-bold text-white tracking-wide">{brand.stats}</span>
+                      </div>
                     </div>
-                    <div className="mb-2 sm:mb-3"><div className="font-mono text-[8px] sm:text-[9px] text-white/70 tracking-wider mb-0.5 sm:mb-1">{brand.code}</div><h3 className="font-serif text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2">{brand.name}</h3><p className="text-white/80 text-xs sm:text-sm leading-relaxed">{brand.desc}</p></div>
-                    <div className="flex justify-between items-center mt-3 sm:mt-4 pt-2 sm:pt-3 md:pt-4 border-t border-white/20"><p className="font-mono text-[10px] sm:text-xs text-white font-bold">{brand.price}</p><motion.div whileHover={{ x: 5 }} className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/30 transition-all"><FontAwesomeIcon icon={faArrowRight} className="text-white text-xs sm:text-sm" /></motion.div></div>
+                  </div>
+                  
+                  {/* Corps de la carte */}
+                  <div className="p-5 sm:p-6">
+                    <div className="mb-3">
+                      <div className="font-mono text-[9px] sm:text-[10px] text-afi-green dark:text-afi-green mb-1">{brand.code}</div>
+                      <h3 className="font-serif text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-2">{brand.name}</h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed line-clamp-3">{brand.desc}</p>
+                    </div>
+                    
+                    <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <p className="font-mono text-[11px] sm:text-xs text-afi-green dark:text-afi-green font-semibold">{brand.price}</p>
+                      <motion.div 
+                        whileHover={{ x: 5 }} 
+                        className="w-8 h-8 sm:w-9 sm:h-9 bg-afi-green/10 rounded-full flex items-center justify-center group-hover:bg-afi-green transition-all"
+                      >
+                        <FontAwesomeIcon icon={faArrowRight} className="text-afi-green group-hover:text-white text-sm sm:text-base transition-all" />
+                      </motion.div>
+                    </div>
                   </div>
                 </Link>
               </motion.div>
@@ -235,7 +305,7 @@ function Home() {
             <button onClick={() => scrollVideo('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shadow-lg hover:bg-afi-green hover:text-white transition-all"><FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" /></button>
             <div ref={scrollContainerRef} className="flex overflow-x-auto gap-3 sm:gap-4 md:gap-6 pb-4 sm:pb-6 scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
               {videoTestimonials.map((video, index) => (
-                <motion.div key={video.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }} whileHover={{ y: -5 }} className="min-w-[250px] sm:min-w-[300px] md:min-w-[380px] bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all flex-shrink-0 border border-gray-200 dark:border-gray-700">
+                <motion.div key={video.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }} whileHover={{ y: -5 }} className="min-w-[250px] sm:min-w-[300px] md:min-w-[380px] bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all flex-shrink-0 border-2 border-afi-green dark:border-afi-dark-border">
                   <div className="relative group cursor-pointer"><img src={video.thumbnail} alt={video.title} className="w-full h-36 sm:h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all flex items-center justify-center"><motion.div whileHover={{ scale: 1.1 }} className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"><FontAwesomeIcon icon={faPlay} className="text-white text-lg sm:text-xl md:text-2xl ml-0.5 sm:ml-1" /></motion.div></div><div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">{video.duration}</div></div>
                   <div className="p-3 sm:p-4 md:p-5"><div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-afi-red/10 flex items-center justify-center"><FontAwesomeIcon icon={faVideo} className="text-afi-red text-xs sm:text-sm" /></div><div><h3 className="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm">{video.title}</h3><p className="text-[10px] sm:text-xs text-afi-red">{video.role}</p></div></div><p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mt-2 line-clamp-3">{video.description}</p><div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 dark:border-white/10"><div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400"><FontAwesomeIcon icon={faStar} className="text-afi-yellow text-xs" /><span className="font-semibold">5.0</span></div><button className="text-[10px] sm:text-xs text-afi-green hover:text-afi-green-dark font-semibold transition-all hover:translate-x-1">Regarder la vidéo →</button></div></div>
                 </motion.div>
@@ -255,7 +325,7 @@ function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {actualites.map((act, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -5 }} className="bg-white dark:bg-afi-dark-card rounded-xl p-4 sm:p-5 md:p-6 shadow-md hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700">
+              <motion.div key={i} initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -5 }} className="bg-white dark:bg-afi-dark-card rounded-xl p-4 sm:p-5 md:p-6 shadow-md hover:shadow-xl transition-all border-2 border-afi-green dark:border-afi-dark-border">
                 <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.5 }} className={`w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 ${act.color} rounded-full flex items-center justify-center mb-3 sm:mb-4`}><FontAwesomeIcon icon={act.icon} className="text-white text-base sm:text-lg md:text-xl" /></motion.div>
                 <p className="text-[10px] sm:text-xs text-afi-green font-mono">{act.date}</p>
                 <h3 className="font-serif text-base sm:text-lg font-bold text-gray-800 dark:text-white mt-1 sm:mt-2">{act.title}</h3>
