@@ -38,8 +38,8 @@ function Navbar() {
     <nav className="sticky top-0 z-50 bg-white dark:bg-afi-dark-bg border-b-2 border-afi-green shadow-lg transition-colors rounded-b-2xl">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16 md:h-20 px-2 md:px-6">
-          {/* Logo */}
-          <div onClick={() => navigate('/')} className="flex items-center cursor-pointer">
+          {/* Logo - avec margin-top pour le descendre */}
+          <div onClick={() => navigate('/')} className="flex items-center cursor-pointer mt-1 md:mt-2">
             {!logoError ? (
               <img src={logo} alt="AFI Collection" className="h-14 md:h-16 w-auto object-contain" onError={() => setLogoError(true)} />
             ) : (
@@ -61,7 +61,7 @@ function Navbar() {
             </button>
           </div>
 
-          {/* Desktop Navigation - texte vert en mode clair */}
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1" ref={dropdownRef}>
             <Link to="/" className="px-3 py-2 text-afi-green dark:text-gray-200 hover:text-afi-green-dark transition-colors flex items-center gap-2 hover:bg-afi-green/10 rounded-lg font-medium"><FontAwesomeIcon icon={faHome} className="text-sm" /><span>Accueil</span></Link>
             
