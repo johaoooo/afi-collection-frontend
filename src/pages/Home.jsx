@@ -14,19 +14,23 @@ import {
   faBagShopping, faShirt, faChartSimple, faChartColumn,
   faComments, faImage, faBullhorn,
   // Icônes pro pour les sous-marques
-  faBriefcase, faSackDollar, faHatCowboy, faIndustry
+  faBriefcase, faShoePrints as faShoes, faShirt as faTShirt, faGem as faJewel, faAppleAlt
 } from '@fortawesome/free-solid-svg-icons';
 import AnimatedSection from '../components/AnimatedSection';
 import CountUp from '../components/CountUp';
+import axios from 'axios';
 
 // Import des images locales
 import afiImage from '../assets/afi.jpeg';
 import afi2Image from '../assets/afi2.jpeg';
 import afi7Image from '../assets/afi7.jpeg';
 
+const API_URL = 'http://localhost:5000/api';
+
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
+  const [videoTestimonials, setVideoTestimonials] = useState([]);
   const scrollContainerRef = useRef(null);
 
   const slides = [
@@ -53,13 +57,18 @@ function Home() {
     }
   ];
 
-  const videoTestimonials = [
-    { id: 1, title: "Marie K. - Cliente fidèle", role: "Ambassadrice AFI", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", description: "Une qualité exceptionnelle et un service irréprochable.", duration: "2:34" },
-    { id: 2, title: "Dr. Jean B. - Partenaire", role: "Partenaire commercial", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", description: "AFI Collection représente l'excellence de l'artisanat africain.", duration: "3:12" },
-    { id: 3, title: "Sarah A. - Diplômée CFP Dorcas", role: "Entrepreneure", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", description: "Grâce à la formation, j'ai pu créer ma propre entreprise.", duration: "4:01" },
-    { id: 4, title: "Fatima B. - Client internationale", role: "Collectionneuse", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", description: "Une collectionneuse fidèle de leurs créations uniques.", duration: "2:15" },
-    { id: 5, title: "CFP Dorcas - Formation", role: "Témoignage apprenante", videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ", thumbnail: "https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg", description: "La formation m'a donné les compétences nécessaires.", duration: "3:45" }
-  ];
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
+  const fetchTestimonials = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/testimonials/active`);
+      setVideoTestimonials(res.data);
+    } catch (err) {
+      console.error('Erreur chargement témoignages', err);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -70,7 +79,7 @@ function Home() {
 
   useEffect(() => {
     let interval;
-    if (autoplay && scrollContainerRef.current) {
+    if (autoplay && scrollContainerRef.current && videoTestimonials.length > 0) {
       interval = setInterval(() => {
         const container = scrollContainerRef.current;
         if (container) {
@@ -85,7 +94,7 @@ function Home() {
       }, 5000);
     }
     return () => clearInterval(interval);
-  }, [autoplay]);
+  }, [autoplay, videoTestimonials]);
 
   const scrollVideo = (direction) => {
     const container = scrollContainerRef.current;
@@ -108,51 +117,11 @@ function Home() {
   ];
 
   const brands = [
-    { 
-      name: 'AFISAC', 
-      code: 'Sacs & Chaussures', 
-      desc: 'Créations en macramé et pagne, confectionnées à la main selon les techniques traditionnelles béninoises.', 
-      price: '15 000 — 40 000 FCFA', 
-      icon: faBagShopping,
-      path: '/afisac', 
-      stats: '25+ modèles' 
-    },
-    { 
-      name: 'AFI Textile', 
-      code: 'Pagnes & Tissus', 
-      desc: 'Teinture artisanale, tissage Faso Dan Fani et décoration intérieure africaine authentique.', 
-      price: '10 000 — 80 000 FCFA', 
-      icon: faShirt,
-      path: '/afi-textile', 
-      stats: '50+ tissus' 
-    },
-    { 
-      name: 'AFI Mode', 
-      code: 'Accessoires', 
-      desc: 'Bijoux tissés, ceintures et accessoires tendance — 100% faits main avec une touche africaine.', 
-      price: '5 000 — 20 000 FCFA', 
-      icon: faGem,
-      path: '/afi-mode', 
-      stats: '100+ créations' 
-    },
-    { 
-      name: 'Agroalimentaire', 
-      code: 'Farines & Dérivés', 
-      desc: 'Soja et sésame 100% béninois, transformés en produits alimentaires sains et nutritifs.', 
-      price: 'Sachets 250g — 1kg', 
-      icon: faSeedling,
-      path: '/agroalimentaire', 
-      stats: '10+ produits' 
-    },
-    { 
-      name: 'CFP Dorcas', 
-      code: 'Centre de Formation', 
-      desc: '4 filières certifiantes pour femmes et jeunes dans l\'artisanat et l\'agroalimentaire.', 
-      price: '50 000 — 150 000 FCFA', 
-      icon: faGraduationCap,
-      path: '/cfp-dorcas', 
-      stats: '200+ diplômées' 
-    }
+    { name: 'AFISAC', code: 'Sacs & Chaussures', desc: 'Créations en macramé et pagne, confectionnées à la main selon les techniques traditionnelles béninoises.', price: '15 000 — 40 000 FCFA', icon: faShoes, path: '/afisac', stats: '25+ modèles' },
+    { name: 'AFI Textile', code: 'Pagnes & Tissus', desc: 'Teinture artisanale, tissage Faso Dan Fani et décoration intérieure africaine authentique.', price: '10 000 — 80 000 FCFA', icon: faTShirt, path: '/afi-textile', stats: '50+ tissus' },
+    { name: 'AFI Mode', code: 'Accessoires', desc: 'Bijoux tissés, ceintures et accessoires tendance — 100% faits main avec une touche africaine.', price: '5 000 — 20 000 FCFA', icon: faJewel, path: '/afi-mode', stats: '100+ créations' },
+    { name: 'Agroalimentaire', code: 'Farines & Dérivés', desc: 'Soja et sésame 100% béninois, transformés en produits alimentaires sains et nutritifs.', price: 'Sachets 250g — 1kg', icon: faSeedling, path: '/agroalimentaire', stats: '10+ produits' },
+    { name: 'CFP Dorcas', code: 'Centre de Formation', desc: '4 filières certifiantes pour femmes et jeunes dans l\'artisanat et l\'agroalimentaire.', price: '50 000 — 150 000 FCFA', icon: faGraduationCap, path: '/cfp-dorcas', stats: '200+ diplômées' }
   ];
 
   const actualites = [
@@ -230,7 +199,7 @@ function Home() {
         </div>
       </div>
 
-      {/* Section Sous-marques - Cartes avec icônes pro */}
+      {/* Section Sous-marques - avec icônes pro */}
       <AnimatedSection direction="up">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16">
           <div className="text-center mb-6 sm:mb-8 md:mb-12">
@@ -242,47 +211,29 @@ function Home() {
             </div>
             <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">Cinq univers complémentaires pour valoriser le savoir-faire béninois.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {brands.map((brand, i) => (
-              <motion.div 
-                key={i} 
-                initial={{ opacity: 0, y: 50 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: i * 0.1 }} 
-                whileHover={{ y: -10, scale: 1.02 }} 
-                className="group relative bg-white dark:bg-afi-dark-card rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 cursor-pointer border-2 border-afi-green dark:border-afi-dark-border"
-              >
+              <motion.div key={i} initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -10 }} className={`group relative bg-gradient-to-br from-afi-green to-afi-green-dark rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer border border-white/20`}>
                 <Link to={brand.path}>
-                  {/* En-tête vert avec icône pro */}
-                  <div className="bg-gradient-to-r from-afi-green to-afi-green-dark px-5 sm:px-6 py-4 sm:py-5">
-                    <div className="flex justify-between items-center">
-                      <motion.div 
-                        whileHover={{ rotate: 10, scale: 1.1 }} 
-                        className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm"
-                      >
-                        <FontAwesomeIcon icon={brand.icon} className="text-white text-2xl sm:text-3xl" />
+                  <div className="absolute top-0 right-0 w-20 sm:w-24 md:w-32 h-20 sm:h-24 md:h-32 bg-white/10 rounded-bl-full"></div>
+                  <div className="p-4 sm:p-5 md:p-6">
+                    <div className="flex justify-between items-start mb-3 sm:mb-4">
+                      <motion.div whileHover={{ rotate: 10, scale: 1.1 }} className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white/20 rounded-xl sm:rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                        <FontAwesomeIcon icon={brand.icon} className="text-white text-3xl sm:text-4xl" />
                       </motion.div>
-                      <div className="bg-white/20 backdrop-blur-sm px-2.5 sm:px-3 py-1 rounded-full">
-                        <span className="text-[10px] sm:text-xs font-bold text-white tracking-wide">{brand.stats}</span>
+                      <div className="bg-white/20 backdrop-blur-sm px-2 sm:px-3 py-0.5 sm:py-1 rounded-full">
+                        <span className="text-[10px] sm:text-xs font-semibold text-white">{brand.stats}</span>
                       </div>
                     </div>
-                  </div>
-                  
-                  {/* Corps de la carte */}
-                  <div className="p-5 sm:p-6">
-                    <div className="mb-3">
-                      <div className="font-mono text-[9px] sm:text-[10px] text-afi-green dark:text-afi-green mb-1">{brand.code}</div>
-                      <h3 className="font-serif text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mb-2">{brand.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm leading-relaxed line-clamp-3">{brand.desc}</p>
+                    <div className="mb-2 sm:mb-3">
+                      <div className="font-mono text-[8px] sm:text-[9px] text-white/70 tracking-wider mb-0.5 sm:mb-1">{brand.code}</div>
+                      <h3 className="font-serif text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2">{brand.name}</h3>
+                      <p className="text-white/80 text-xs sm:text-sm leading-relaxed">{brand.desc}</p>
                     </div>
-                    
-                    <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                      <p className="font-mono text-[11px] sm:text-xs text-afi-green dark:text-afi-green font-semibold">{brand.price}</p>
-                      <motion.div 
-                        whileHover={{ x: 5 }} 
-                        className="w-8 h-8 sm:w-9 sm:h-9 bg-afi-green/10 rounded-full flex items-center justify-center group-hover:bg-afi-green transition-all"
-                      >
-                        <FontAwesomeIcon icon={faArrowRight} className="text-afi-green group-hover:text-white text-sm sm:text-base transition-all" />
+                    <div className="flex justify-between items-center mt-3 sm:mt-4 pt-2 sm:pt-3 md:pt-4 border-t border-white/20">
+                      <p className="font-mono text-[10px] sm:text-xs text-white font-bold">{brand.price}</p>
+                      <motion.div whileHover={{ x: 5 }} className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm group-hover:bg-white/30 transition-all">
+                        <FontAwesomeIcon icon={faArrowRight} className="text-white text-xs sm:text-sm" />
                       </motion.div>
                     </div>
                   </div>
@@ -297,22 +248,64 @@ function Home() {
       <AnimatedSection direction="up">
         <div className="max-w-7xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16">
           <div className="text-center mb-6 sm:mb-8 md:mb-12">
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-2"><FontAwesomeIcon icon={faComments} className="text-afi-red text-lg sm:text-xl" /><h2 className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white">Ils <em className="text-afi-red not-italic">parlent</em> de nous</h2></div>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">Découvrez les retours authentiques de nos clients, partenaires et apprenantes</p>
-          </div>
-          <div className="relative">
-            <button onClick={() => scrollVideo('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shadow-lg hover:bg-afi-green hover:text-white transition-all"><FontAwesomeIcon icon={faChevronLeft} className="text-xs sm:text-sm" /></button>
-            <button onClick={() => scrollVideo('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shadow-lg hover:bg-afi-green hover:text-white transition-all"><FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" /></button>
-            <div ref={scrollContainerRef} className="flex overflow-x-auto gap-3 sm:gap-4 md:gap-6 pb-4 sm:pb-6 scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
-              {videoTestimonials.map((video, index) => (
-                <motion.div key={video.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }} whileHover={{ y: -5 }} className="min-w-[250px] sm:min-w-[300px] md:min-w-[380px] bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all flex-shrink-0 border-2 border-afi-green dark:border-afi-dark-border">
-                  <div className="relative group cursor-pointer"><img src={video.thumbnail} alt={video.title} className="w-full h-36 sm:h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-105" /><div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all flex items-center justify-center"><motion.div whileHover={{ scale: 1.1 }} className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center"><FontAwesomeIcon icon={faPlay} className="text-white text-lg sm:text-xl md:text-2xl ml-0.5 sm:ml-1" /></motion.div></div><div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">{video.duration}</div></div>
-                  <div className="p-3 sm:p-4 md:p-5"><div className="flex items-center gap-2 mb-2"><div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-afi-red/10 flex items-center justify-center"><FontAwesomeIcon icon={faVideo} className="text-afi-red text-xs sm:text-sm" /></div><div><h3 className="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm">{video.title}</h3><p className="text-[10px] sm:text-xs text-afi-red">{video.role}</p></div></div><p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mt-2 line-clamp-3">{video.description}</p><div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 dark:border-white/10"><div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400"><FontAwesomeIcon icon={faStar} className="text-afi-yellow text-xs" /><span className="font-semibold">5.0</span></div><button className="text-[10px] sm:text-xs text-afi-green hover:text-afi-green-dark font-semibold transition-all hover:translate-x-1">Regarder la vidéo →</button></div></div>
-                </motion.div>
-              ))}
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-1 sm:mb-2">
+              <FontAwesomeIcon icon={faComments} className="text-afi-red text-lg sm:text-xl" />
+              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 dark:text-white">
+                Ils <em className="text-afi-red not-italic">parlent</em> de nous
+              </h2>
             </div>
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-xs sm:text-sm md:text-base px-2">
+              Découvrez les retours authentiques de nos clients, partenaires et apprenantes
+            </p>
           </div>
-          <div className="flex justify-center gap-2 mt-4 sm:mt-6"><button onClick={() => setAutoplay(!autoplay)} className={`px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs font-medium transition-all flex items-center gap-1 sm:gap-2 ${autoplay ? 'bg-afi-green text-white' : 'bg-gray-200 text-gray-600'}`}><FontAwesomeIcon icon={autoplay ? faPause : faPlay} className="text-xs" />{autoplay ? 'Autoplay' : 'Pause'}</button></div>
+          {videoTestimonials.length > 0 && (
+            <div className="relative">
+              <button onClick={() => scrollVideo('left')} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shadow-lg hover:bg-afi-green hover:text-white transition-all"><FontAwesomeIcon icon={faChevronLeft} className="text-xs sm:text-sm" /></button>
+              <button onClick={() => scrollVideo('right')} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center shadow-lg hover:bg-afi-green hover:text-white transition-all"><FontAwesomeIcon icon={faChevronRight} className="text-xs sm:text-sm" /></button>
+              <div ref={scrollContainerRef} className="flex overflow-x-auto gap-3 sm:gap-4 md:gap-6 pb-4 sm:pb-6 scroll-smooth" style={{ scrollbarWidth: 'thin' }}>
+                {videoTestimonials.map((video, index) => (
+                  <motion.div key={video.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }} whileHover={{ y: -5 }} className="min-w-[250px] sm:min-w-[300px] md:min-w-[380px] bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all flex-shrink-0 border-2 border-afi-green dark:border-afi-dark-border">
+                    <div className="relative group cursor-pointer">
+                      <img src={video.thumbnail || 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'} alt={video.title} className="w-full h-36 sm:h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all flex items-center justify-center">
+                        <motion.div whileHover={{ scale: 1.1 }} className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <FontAwesomeIcon icon={faPlay} className="text-white text-lg sm:text-xl md:text-2xl ml-0.5 sm:ml-1" />
+                        </motion.div>
+                      </div>
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">{video.duration}</div>
+                    </div>
+                    <div className="p-3 sm:p-4 md:p-5">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-full bg-afi-red/10 flex items-center justify-center">
+                          <FontAwesomeIcon icon={faVideo} className="text-afi-red text-xs sm:text-sm" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-800 dark:text-white text-xs sm:text-sm">{video.name}</h3>
+                          <p className="text-[10px] sm:text-xs text-afi-red">{video.role}</p>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 dark:text-gray-300 text-xs sm:text-sm mt-2 line-clamp-3">{video.message}</p>
+                      <div className="flex items-center justify-between mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-gray-100 dark:border-white/10">
+                        <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-400">
+                          <FontAwesomeIcon icon={faStar} className="text-afi-yellow text-xs" />
+                          <span className="font-semibold">{video.note}.0</span>
+                        </div>
+                        <button className="text-[10px] sm:text-xs text-afi-green hover:text-afi-green-dark font-semibold transition-all hover:translate-x-1">
+                          Regarder la vidéo →
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="flex justify-center gap-2 mt-4 sm:mt-6">
+            <button onClick={() => setAutoplay(!autoplay)} className={`px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 rounded-full text-[10px] sm:text-xs font-medium transition-all flex items-center gap-1 sm:gap-2 ${autoplay ? 'bg-afi-green text-white' : 'bg-gray-200 text-gray-600'}`}>
+              <FontAwesomeIcon icon={autoplay ? faPause : faPlay} className="text-xs" />
+              {autoplay ? 'Autoplay' : 'Pause'}
+            </button>
+          </div>
         </div>
       </AnimatedSection>
 

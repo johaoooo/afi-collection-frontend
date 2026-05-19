@@ -4,11 +4,15 @@ import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faEnvelope, faPhone, faMapMarkerAlt, faClock, 
-  faPaperPlane, faUser, faComment, faTag
+  faPaperPlane, faUser, faComment, faTag, faCheckCircle,
+  faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 import { 
   faWhatsapp, faFacebookF, faInstagram, faTwitter 
 } from '@fortawesome/free-brands-svg-icons';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -25,15 +29,23 @@ function Contact() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setStatus('Message envoyé avec succès !');
+    setStatus('');
+    
+    try {
+      await axios.post(`${API_URL}/messages`, formData);
+      setStatus('success');
       setFormData({ name: '', email: '', phone: '', subject: 'Commande produit', message: '' });
-      setIsLoading(false);
       setTimeout(() => setStatus(''), 3000);
-    }, 1000);
+    } catch (err) {
+      console.error('Erreur envoi message', err);
+      setStatus('error');
+      setTimeout(() => setStatus(''), 3000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const contactInfos = [
@@ -57,7 +69,6 @@ function Contact() {
         <meta name="description" content="Contactez AFI Collection pour vos commandes, formations ou partenariats" />
       </Helmet>
 
-      {/* Hero compact */}
       <div className="bg-gradient-to-r from-afi-green to-afi-green-dark rounded-b-3xl">
         <div className="max-w-7xl mx-auto px-4 py-10">
           <div className="text-center">
@@ -76,13 +87,24 @@ function Contact() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Formulaire de contact */}
           <div className="lg:col-span-2">
-            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden">
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5 }} className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden border-2 border-afi-green dark:border-afi-dark-border">
               <div className="bg-afi-green px-6 py-4">
                 <h2 className="font-serif text-xl font-bold text-white">Envoyez-nous un message</h2>
                 <p className="text-white/80 text-sm">Réponse sous 24-48h</p>
               </div>
               
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                {status === 'success' && (
+                  <div className="bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 p-3 rounded-lg text-sm text-center flex items-center justify-center gap-2">
+                    <FontAwesomeIcon icon={faCheckCircle} /> Message envoyé avec succès !
+                  </div>
+                )}
+                {status === 'error' && (
+                  <div className="bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm text-center">
+                    Une erreur est survenue. Veuillez réessayer.
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="font-mono text-[9px] text-afi-green tracking-wider block mb-1">NOM COMPLET</label>
@@ -132,10 +154,8 @@ function Contact() {
                 </div>
 
                 <button type="submit" disabled={isLoading} className="w-full bg-afi-green text-white py-2.5 rounded-lg font-semibold hover:bg-afi-green-dark transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm">
-                  {isLoading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : <>Envoyer le message <FontAwesomeIcon icon={faPaperPlane} className="text-sm" /></>}
+                  {isLoading ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <><FontAwesomeIcon icon={faPaperPlane} className="text-sm" /> Envoyer le message</>}
                 </button>
-                
-                {status && <div className="bg-afi-green/10 text-afi-green p-3 rounded-lg text-sm text-center">{status}</div>}
               </form>
             </motion.div>
           </div>
@@ -143,8 +163,7 @@ function Contact() {
           {/* Informations de contact */}
           <div>
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.2 }} className="space-y-6">
-              {/* Carte des infos */}
-              <div className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden border-2 border-afi-green dark:border-afi-dark-border">
                 <div className="bg-afi-green px-6 py-4">
                   <h2 className="font-serif text-xl font-bold text-white">Coordonnées</h2>
                   <p className="text-white/80 text-sm">Retrouvez-nous ici</p>
@@ -168,8 +187,7 @@ function Contact() {
                 </div>
               </div>
 
-              {/* Carte des réseaux sociaux */}
-              <div className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden border-2 border-afi-green dark:border-afi-dark-border">
                 <div className="bg-afi-green px-6 py-4">
                   <h2 className="font-serif text-xl font-bold text-white">Suivez-nous</h2>
                   <p className="text-white/80 text-sm">Restez connectés</p>
@@ -190,7 +208,6 @@ function Contact() {
                 </div>
               </div>
 
-              {/* Carte horaire */}
               <div className="bg-gradient-to-r from-afi-green to-afi-green-dark rounded-xl p-5 text-center text-white">
                 <FontAwesomeIcon icon={faClock} className="text-2xl mb-2 opacity-80" />
                 <h3 className="font-serif text-lg font-bold mb-1">Service client disponible</h3>
