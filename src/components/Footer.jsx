@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faFacebookF, faInstagram, faWhatsapp, faTwitter, 
-  faLinkedinIn, faYoutube 
+  faLinkedinIn
 } from '@fortawesome/free-brands-svg-icons';
 import { 
   faHeart, faEnvelope, faPhone, faMapMarkerAlt, 
@@ -52,17 +52,17 @@ function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 dark:bg-afi-dark-bg text-white mt-auto">
+    <footer className="bg-gray-100 dark:bg-afi-dark-bg text-gray-800 dark:text-white mt-auto border-t border-gray-200 dark:border-gray-700">
       {/* Newsletter Section */}
-      <div className="border-b border-gray-800 dark:border-gray-700">
+      <div className="border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <FontAwesomeIcon icon={faNewspaper} className="text-afi-green text-xl" />
-                <h3 className="font-serif text-xl font-bold">Newsletter</h3>
+                <h3 className="font-serif text-xl font-bold text-gray-800 dark:text-white">Newsletter</h3>
               </div>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
                 Recevez nos actualités et offres exclusives
               </p>
             </div>
@@ -72,7 +72,7 @@ function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Votre adresse email"
-                className="flex-1 px-4 py-2.5 rounded-lg bg-gray-800 dark:bg-gray-700 text-white placeholder-gray-400 border border-gray-700 focus:border-afi-green focus:outline-none transition-colors"
+                className="flex-1 px-4 py-2.5 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 border border-gray-300 dark:border-gray-600 focus:border-afi-green focus:outline-none transition-colors"
                 required
               />
               <button
@@ -97,7 +97,7 @@ function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <img src={logo} alt="AFI Collection" className="h-12 w-auto object-contain" />
             </div>
-            <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 leading-relaxed">
               « Tisser l'avenir, valoriser le local » — AFI Collection valorise le patrimoine artisanal du Bénin et de l'Afrique de l'Ouest.
             </p>
             <div className="flex gap-3">
@@ -107,7 +107,7 @@ function Footer() {
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center hover:scale-110 transition-all duration-300 group"
+                  className="w-9 h-9 rounded-full flex items-center justify-center hover:scale-110 transition-all duration-300"
                   style={{ backgroundColor: social.color }}
                 >
                   <FontAwesomeIcon icon={social.icon} className="text-white text-sm" />
@@ -127,7 +127,7 @@ function Footer() {
                 <li key={index}>
                   <Link 
                     to={link.path} 
-                    className="text-gray-400 hover:text-afi-green transition-colors text-sm flex items-center gap-2 group"
+                    className="text-gray-600 dark:text-gray-400 hover:text-afi-green transition-colors text-sm flex items-center gap-2 group"
                   >
                     <FontAwesomeIcon icon={link.icon} className="text-xs opacity-60 group-hover:opacity-100" />
                     {link.name}
@@ -148,7 +148,7 @@ function Footer() {
                 <li key={index}>
                   <Link 
                     to={link.path} 
-                    className="text-gray-400 hover:text-afi-green transition-colors text-sm"
+                    className="text-gray-600 dark:text-gray-400 hover:text-afi-green transition-colors text-sm"
                   >
                     {link.name}
                   </Link>
@@ -164,21 +164,21 @@ function Footer() {
               CONTACT
             </h4>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3 text-gray-400 text-sm">
+              <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400 text-sm">
                 <FontAwesomeIcon icon={faPhone} className="text-afi-green mt-0.5" />
                 <span>+229 01 96 06 22 87</span>
               </li>
-              <li className="flex items-start gap-3 text-gray-400 text-sm">
+              <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400 text-sm">
                 <FontAwesomeIcon icon={faEnvelope} className="text-afi-green mt-0.5" />
                 <a href="mailto:afiavitossa@gmail.com" className="hover:text-afi-green transition-colors">
                   afiavitossa@gmail.com
                 </a>
               </li>
-              <li className="flex items-start gap-3 text-gray-400 text-sm">
+              <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400 text-sm">
                 <FontAwesomeIcon icon={faMapMarkerAlt} className="text-afi-green mt-0.5" />
                 <span>Zoundja, Abomey-Calavi, Bénin</span>
               </li>
-              <li className="flex items-start gap-3 text-gray-400 text-sm">
+              <li className="flex items-start gap-3 text-gray-600 dark:text-gray-400 text-sm">
                 <FontAwesomeIcon icon={faClock} className="text-afi-green mt-0.5" />
                 <span>Lun - Sam : 9h - 18h</span>
               </li>
@@ -196,21 +196,21 @@ function Footer() {
       </div>
 
       {/* Copyright */}
-      <div className="border-t border-gray-800 dark:border-gray-700">
+      <div className="border-t border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-gray-500 text-xs font-mono tracking-wider">
+            <p className="text-gray-500 dark:text-gray-500 text-xs font-mono tracking-wider">
               © {currentYear} AFI Collection - Tous droits réservés
             </p>
             <div className="flex gap-6">
-              <Link to="/conditions-generales" className="text-gray-500 text-xs hover:text-afi-green transition-colors">
+              <Link to="/conditions-generales" className="text-gray-500 dark:text-gray-500 text-xs hover:text-afi-green transition-colors">
                 Conditions générales
               </Link>
-              <Link to="/politique-confidentialite" className="text-gray-500 text-xs hover:text-afi-green transition-colors">
+              <Link to="/politique-confidentialite" className="text-gray-500 dark:text-gray-500 text-xs hover:text-afi-green transition-colors">
                 Confidentialité
               </Link>
             </div>
-            <p className="text-gray-600 text-xs flex items-center gap-1">
+            <p className="text-gray-400 dark:text-gray-600 text-xs flex items-center gap-1">
               Conçu avec <FontAwesomeIcon icon={faHeart} className="text-afi-red text-xs" /> au Bénin
             </p>
           </div>
