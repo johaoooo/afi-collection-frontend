@@ -1,322 +1,541 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faBox, faNewspaper, faGraduationCap, faSignOutAlt, 
-  faPlus, faEdit, faTrash, faSave, faTimes, faCog,
-  faChartLine, faVideo, faUser, faEnvelope, faPhone,
-  faShoppingCart, faTruck, faCheckCircle, faTimesCircle, 
-  faHourglassHalf, faEnvelopeOpen, faImage, faCalendarAlt,
-  faHeart, faPalette, faGlobe, faMapMarkerAlt, faClock
+  faTachometerAlt, faBox, faShoppingCart, faUsers, faEnvelope, 
+  faStar, faGraduationCap, faCog, faPlus, faEdit, faTrash, 
+  faSave, faTimes, faMoneyBillWave, faGlobe, faClock,
+  faPalette, faShareAlt, faSlidersH
 } from '@fortawesome/free-solid-svg-icons';
-import { 
-  faYoutube, faFacebookF, faInstagram, faTwitter, faWhatsapp 
-} from '@fortawesome/free-brands-svg-icons';
-import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
-const IMAGE_URL = 'http://localhost:5000';
+// Icônes de marques (brands)
+import { faFacebook, faInstagram, faWhatsapp, faTwitter } from '@fortawesome/free-brands-svg-icons';
 
 function Admin() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(true);
+  
   const [products, setProducts] = useState([]);
-  const [news, setNews] = useState([]);
-  const [formations, setFormations] = useState([]);
-  const [testimonials, setTestimonials] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [gallery, setGallery] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [donations, setDonations] = useState([]);
-  const [activeTab, setActiveTab] = useState('products');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [loginError, setLoginError] = useState('');
-  const [selectedMessage, setSelectedMessage] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showAddEventForm, setShowAddEventForm] = useState(false);
-  const [showEditEventForm, setShowEditEventForm] = useState(false);
-  const [newGalleryItem, setNewGalleryItem] = useState({ title: '', description: '', category: 'afisac', image: '' });
-  const [newEvent, setNewEvent] = useState({ title: '', location: '', date: '', type: 'Foire', description: '', year: new Date().getFullYear(), image: '', participants: 0 });
-  const [editEvent, setEditEvent] = useState({ id: null, title: '', location: '', date: '', type: '', description: '', year: '', image: '', participants: 0 });
+  const [testimonials, setTestimonials] = useState([]);
+  const [formations, setFormations] = useState([]);
+  const [categories, setCategories] = useState([]);
+  
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('');
+  const [showConfirmDelete, setShowConfirmDelete] = useState(null);
+  
   const [settings, setSettings] = useState({
     siteName: 'AFI Collection',
-    slogan: 'Tisser l\'avenir, valoriser le local',
-    logo: '/logo.png',
-    favicon: '/favicon.ico',
-    contactEmail: 'afiavitossa@gmail.com',
-    phone: '+229 01 96 06 22 87',
-    phone2: '',
-    address: 'Zoundja, Abomey-Calavi, Bénin',
-    mapUrl: '',
-    openingHours: 'Lun - Sam : 9h - 18h',
+    siteDescription: 'Artisanat béninois d\'exception',
+    siteLogo: '/logo.png',
+    siteFavicon: '/favicon.ico',
+    contactEmail: 'contact@afi-collection.com',
+    contactPhone: '+229 01 96 06 22 87',
+    contactAddress: 'Zoundja, Abomey-Calavi, Bénin',
+    facebook: 'https://facebook.com/afi-collection',
+    instagram: 'https://instagram.com/afi-collection',
+    twitter: 'https://twitter.com/afi-collection',
+    whatsapp: '22996062287',
     primaryColor: '#008753',
     secondaryColor: '#FCD116',
     accentColor: '#E8112D',
-    facebook: 'https://facebook.com/aficollection',
-    instagram: 'https://instagram.com/aficollection',
-    twitter: 'https://twitter.com/aficollection',
-    whatsapp: 'https://wa.me/2290196062287',
-    youtube: '',
-    linkedin: '',
-    metaDescription: 'AFI Collection - Artisanat béninois d\'exception. Sacs, tissus, accessoires, agroalimentaire et formation artisanale.',
-    metaKeywords: 'artisanat, bénin, sacs, tissus, formation, afi collection',
+    fontFamily: 'Cormorant Garamond',
+    enableCart: true,
+    enableTestimonials: true,
+    enableBlog: false,
+    enableNewsletter: true,
+    maintenanceMode: false,
+    metaTitle: 'AFI Collection - Artisanat béninois',
+    metaDescription: 'Sacs, tissus, accessoires et formation artisanale',
+    metaKeywords: 'artisanat, bénin, sacs, tissus, formation',
     googleAnalytics: '',
-    newsletterActive: true,
-    maintenanceMode: false
+    paymentMethods: ['whatsapp', 'bank_transfer'],
+    bankName: 'Banque Atlantique',
+    bankAccount: 'XXX-XXX-XXX',
+    openingHours: 'Lundi - Samedi: 8h - 18h',
+    closingDays: 'Dimanche',
+    smtpHost: 'smtp.gmail.com',
+    smtpPort: '587',
+    smtpUser: '',
+    smtpPass: ''
+  });
+  
+  const [stats, setStats] = useState({
+    totalProducts: 0, totalOrders: 0, totalRevenue: 0, totalUsers: 0,
+    totalMessages: 0, pendingOrders: 0, lowStock: 0, totalSales: 0
   });
 
-  const fetchProducts = async () => { const res = await axios.get(`${API_URL}/products`); setProducts(res.data); };
-  const fetchNews = async () => { const res = await axios.get(`${API_URL}/news`); setNews(res.data); };
-  const fetchFormations = async () => { const res = await axios.get(`${API_URL}/formations`); setFormations(res.data); };
-  const fetchTestimonials = async () => { const res = await axios.get(`${API_URL}/testimonials`); setTestimonials(res.data); };
-  const fetchOrders = async () => { const res = await axios.get(`${API_URL}/orders`); setOrders(res.data); };
-  const fetchMessages = async () => { const res = await axios.get(`${API_URL}/messages`); setMessages(res.data); };
-  const fetchGallery = async () => { const res = await axios.get(`${API_URL}/gallery`); setGallery(res.data); };
-  const fetchEvents = async () => { const res = await axios.get(`${API_URL}/events`); setEvents(res.data); };
-  const fetchDonations = async () => { 
-    try { 
-      const res = await axios.get(`${API_URL}/donations`); 
-      setDonations(res.data); 
-    } catch(e) { console.log('Donations API non disponible'); } 
-  };
-
-  const deleteProduct = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/products/${id}`); fetchProducts(); } };
-  const deleteNews = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/news/${id}`); fetchNews(); } };
-  const deleteFormation = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/formations/${id}`); fetchFormations(); } };
-  const deleteTestimonial = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/testimonials/${id}`); fetchTestimonials(); } };
-  const deleteOrder = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/orders/${id}`); fetchOrders(); } };
-  const deleteMessage = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/messages/${id}`); fetchMessages(); setSelectedMessage(null); } };
-  const deleteGalleryItem = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/gallery/${id}`); fetchGallery(); } };
-  const deleteEvent = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/events/${id}`); fetchEvents(); } };
-  const deleteDonation = async (id) => { if (window.confirm('Supprimer ?')) { await axios.delete(`${API_URL}/donations/${id}`); fetchDonations(); } };
-
-  const addGalleryItem = async (e) => { e.preventDefault(); await axios.post(`${API_URL}/gallery`, newGalleryItem); setNewGalleryItem({ title: '', description: '', category: 'afisac', image: '' }); setShowAddForm(false); fetchGallery(); };
-  const addEvent = async (e) => { e.preventDefault(); await axios.post(`${API_URL}/events`, newEvent); setNewEvent({ title: '', location: '', date: '', type: 'Foire', description: '', year: new Date().getFullYear(), image: '', participants: 0 }); setShowAddEventForm(false); fetchEvents(); };
-  
-  const startEditEvent = (event) => {
-    setSelectedEvent(event);
-    setEditEvent({
-      id: event.id, title: event.title, location: event.location, date: event.date,
-      type: event.type, description: event.description, year: event.year,
-      image: event.image || '', participants: event.participants || 0
-    });
-    setShowEditEventForm(true);
-  };
-  const cancelEditEvent = () => { setSelectedEvent(null); setEditEvent({ id: null, title: '', location: '', date: '', type: '', description: '', year: '', image: '', participants: 0 }); setShowEditEventForm(false); };
-  const updateEvent = async (e) => { e.preventDefault(); try { await axios.put(`${API_URL}/events/${editEvent.id}`, editEvent); cancelEditEvent(); fetchEvents(); } catch(err) { console.error(err); alert('Erreur modification'); } };
-
-  const updateSettings = async (e) => { e.preventDefault(); alert('Paramètres enregistrés !'); localStorage.setItem('siteSettings', JSON.stringify(settings)); };
-
-  const updateOrderStatus = async (id, status) => { await axios.put(`${API_URL}/orders/${id}/status`, { status }); fetchOrders(); };
-  const markMessageAsRead = async (id) => { await axios.put(`${API_URL}/messages/${id}/read`); fetchMessages(); };
-
-  const handleLogin = (e) => {
-    e.preventDefault();
-    if (loginData.email === 'admin@afi-collection.com' && loginData.password === 'admin123') {
-      setIsAuthenticated(true);
-      localStorage.setItem('adminAuth', 'true');
-    } else {
-      setLoginError('Email ou mot de passe incorrect');
-    }
-  };
-  const handleLogout = () => { setIsAuthenticated(false); localStorage.removeItem('adminAuth'); };
-
   useEffect(() => {
-    const auth = localStorage.getItem('adminAuth');
-    const savedSettings = localStorage.getItem('siteSettings');
-    if (savedSettings) setSettings(JSON.parse(savedSettings));
-    if (auth === 'true') setIsAuthenticated(true);
+    const token = localStorage.getItem('adminToken');
+    const userData = localStorage.getItem('adminUser');
+    
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setIsLoggedIn(true);
+        setUser(parsedUser);
+        fetchAllData();
+      } catch (e) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        setIsLoggedIn(false);
+      }
+    }
+    setLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchProducts(); fetchNews(); fetchFormations(); fetchTestimonials(); fetchOrders(); 
-      fetchMessages(); fetchGallery(); fetchEvents(); fetchDonations();
+  const fetchAllData = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      const [productsRes, ordersRes, usersRes, messagesRes, testimonialsRes, formationsRes, categoriesRes, settingsRes] = await Promise.all([
+        axios.get('/api/admin/products', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/orders', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/users', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/messages', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/testimonials', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/formations', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/categories', { headers }).catch(() => ({ data: [] })),
+        axios.get('/api/admin/settings', { headers }).catch(() => ({ data: {} }))
+      ]);
+      
+      setProducts(productsRes.data || []);
+      setOrders(ordersRes.data || []);
+      setUsers(usersRes.data || []);
+      setMessages(messagesRes.data || []);
+      setTestimonials(testimonialsRes.data || []);
+      setFormations(formationsRes.data || []);
+      setCategories(categoriesRes.data || []);
+      if (settingsRes.data) setSettings(prev => ({ ...prev, ...settingsRes.data }));
+      
+      const pendingOrders = (ordersRes.data || []).filter(o => o.status === 'pending').length;
+      const lowStock = (productsRes.data || []).filter(p => p.stock < 5).length;
+      const totalRevenue = (ordersRes.data || []).reduce((sum, o) => sum + (o.total || 0), 0);
+      
+      setStats({
+        totalProducts: (productsRes.data || []).length,
+        totalOrders: (ordersRes.data || []).length,
+        totalRevenue,
+        totalUsers: (usersRes.data || []).length,
+        totalMessages: (messagesRes.data || []).length,
+        pendingOrders,
+        lowStock,
+        totalSales: (ordersRes.data || []).length
+      });
+    } catch (error) {
+      console.error('Erreur chargement:', error);
     }
-  }, [isAuthenticated]);
-
-  const getStatusBadge = (status) => {
-    const config = {
-      pending: { color: 'bg-yellow-100 text-yellow-800', icon: faHourglassHalf, label: 'En attente' },
-      confirmed: { color: 'bg-blue-100 text-blue-800', icon: faCheckCircle, label: 'Confirmée' },
-      shipped: { color: 'bg-purple-100 text-purple-800', icon: faTruck, label: 'Expédiée' },
-      delivered: { color: 'bg-green-100 text-green-800', icon: faCheckCircle, label: 'Livrée' },
-      cancelled: { color: 'bg-red-100 text-red-800', icon: faTimesCircle, label: 'Annulée' }
-    };
-    return config[status] || config.pending;
   };
 
-  if (!isAuthenticated) {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const email = formData.get('email');
+    const password = formData.get('password');
+    
+    try {
+      const response = await axios.post('/api/admin/login', { email, password });
+      localStorage.setItem('adminToken', response.data.token);
+      localStorage.setItem('adminUser', JSON.stringify(response.data.user || { name: 'Admin', email: email, role: 'admin' }));
+      setIsLoggedIn(true);
+      setUser(response.data.user || { name: 'Admin', email: email, role: 'admin' });
+      fetchAllData();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Erreur de connexion');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    setIsLoggedIn(false);
+    setUser(null);
+  };
+
+  const handleSave = async (data, type) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const headers = { Authorization: `Bearer ${token}` };
+      
+      if (data.id) {
+        await axios.put(`/api/admin/${type}/${data.id}`, data, { headers });
+      } else {
+        const response = await axios.post(`/api/admin/${type}`, data, { headers });
+        data = response.data;
+      }
+      
+      const stateMap = {
+        product: { state: products, setter: setProducts },
+        testimonial: { state: testimonials, setter: setTestimonials },
+        formation: { state: formations, setter: setFormations },
+        category: { state: categories, setter: setCategories }
+      };
+      
+      const config = stateMap[type];
+      if (config) {
+        if (data.id) {
+          config.setter(config.state.map(item => item.id === data.id ? data : item));
+        } else {
+          config.setter([...config.state, data]);
+        }
+      }
+      
+      setShowModal(false);
+      setSelectedItem(null);
+      fetchAllData();
+    } catch (error) {
+      alert(`Erreur lors de la sauvegarde`);
+    }
+  };
+
+  const handleDelete = async (id, type) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.delete(`/api/admin/${type}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      
+      const stateMap = {
+        product: { state: products, setter: setProducts },
+        testimonial: { state: testimonials, setter: setTestimonials },
+        formation: { state: formations, setter: setFormations },
+        user: { state: users, setter: setUsers },
+        message: { state: messages, setter: setMessages },
+        category: { state: categories, setter: setCategories }
+      };
+      
+      const config = stateMap[type];
+      if (config) {
+        config.setter(config.state.filter(item => item.id !== id));
+      }
+      
+      setShowConfirmDelete(null);
+      fetchAllData();
+    } catch (error) {
+      alert(`Erreur lors de la suppression`);
+    }
+  };
+
+  const handleUpdateOrderStatus = async (id, status) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.put(`/api/admin/orders/${id}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
+      fetchAllData();
+    } catch (error) {
+      alert('Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      await axios.put('/api/admin/settings', settings, { headers: { Authorization: `Bearer ${token}` } });
+      alert('Paramètres enregistrés avec succès !');
+    } catch (error) {
+      alert('Erreur lors de l\'enregistrement');
+    }
+  };
+
+  const FormModal = ({ type, item, onClose, onSave }) => {
+    const [formData, setFormData] = useState(item || getDefaultFormData(type));
+
+    function getDefaultFormData(type) {
+      switch(type) {
+        case 'product':
+          return { name: '', price: '', category: 'sac', description: '', icon: '👜', stock: 0 };
+        case 'testimonial':
+          return { name: '', role: '', content: '', rating: 5, active: true };
+        case 'formation':
+          return { name: '', description: '', duration: '1 mois', price: '' };
+        case 'category':
+          return { name: '', slug: '', icon: '📁' };
+        default:
+          return {};
+      }
+    }
+
+    const getFormFields = () => {
+      switch(type) {
+        case 'product':
+          return (
+            <>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Catégorie</label><select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}><option value="sac">Sac</option><option value="chaussure">Chaussure</option><option value="pagne">Pagne</option><option value="accessoire">Accessoire</option></select></div>
+              <div><label className="block mb-1 font-medium">Icône</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Stock</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
+            </>
+          );
+        case 'testimonial':
+          return (
+            <>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Rôle</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Témoignage</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="4" value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Note</label><select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.rating} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})}><option value="5">5 étoiles</option><option value="4">4 étoiles</option><option value="3">3 étoiles</option><option value="2">2 étoiles</option><option value="1">1 étoile</option></select></div>
+              <div><label className="flex items-center gap-2"><input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} /> Activer sur le site</label></div>
+            </>
+          );
+        case 'formation':
+          return (
+            <>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
+            </>
+          );
+        default:
+          return null;
+      }
+    };
+
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg w-96">
-          <div className="text-center mb-6"><FontAwesomeIcon icon={faChartLine} className="text-5xl text-afi-green mb-3" /><h2 className="text-2xl font-bold">Administration</h2></div>
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">{item ? '✏️ Modifier' : '➕ Ajouter'} {type === 'product' ? 'un produit' : type === 'testimonial' ? 'un témoignage' : type === 'formation' ? 'une formation' : 'une catégorie'}</h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700"><FontAwesomeIcon icon={faTimes} size="lg" /></button>
+          </div>
+          <div className="space-y-3">
+            {getFormFields()}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <button onClick={onClose} className="px-4 py-2 border rounded">Annuler</button>
+            <button onClick={() => onSave(formData)} className="px-4 py-2 bg-afi-green text-white rounded"><FontAwesomeIcon icon={faSave} className="mr-1" /> Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (!isLoggedIn && !loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-96">
+          <div className="text-center mb-6">
+            <h1 className="text-3xl font-serif font-bold"><span className="text-afi-green">AFI</span> Collection</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">Espace Administration</p>
+          </div>
           <form onSubmit={handleLogin}>
-            <input type="email" placeholder="Email" className="w-full p-3 border rounded-lg mb-3 dark:bg-gray-700 dark:text-white" value={loginData.email} onChange={(e) => setLoginData({...loginData, email: e.target.value})} />
-            <input type="password" placeholder="Mot de passe" className="w-full p-3 border rounded-lg mb-3 dark:bg-gray-700 dark:text-white" value={loginData.password} onChange={(e) => setLoginData({...loginData, password: e.target.value})} />
-            {loginError && <p className="text-red-500 text-sm mb-3">{loginError}</p>}
-            <button type="submit" className="w-full bg-afi-green text-white py-3 rounded-lg font-semibold"><FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Se connecter</button>
+            <div className="mb-4"><label className="block mb-2">Email</label><input type="email" name="email" className="w-full p-3 border rounded bg-white dark:bg-gray-700" required /></div>
+            <div className="mb-4"><label className="block mb-2">Mot de passe</label><input type="password" name="password" className="w-full p-3 border rounded bg-white dark:bg-gray-700" required /></div>
+            <button type="submit" className="w-full bg-afi-green text-white p-3 rounded font-semibold">Se connecter</button>
           </form>
+          <div className="text-center text-xs text-gray-400 mt-4">admin@afi-collection.com / admin123</div>
         </div>
       </div>
     );
   }
 
-  const unreadCount = messages.filter(m => !m.isRead).length;
-  const totalDonations = donations.reduce((sum, d) => sum + (d.amount || 0), 0);
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="text-center"><div className="text-3xl mb-4">⏳</div><p>Chargement...</p></div>
+      </div>
+    );
+  }
 
   return (
     <>
-      <Helmet><title>Administration - AFI Collection</title></Helmet>
+      <Helmet><title>Administration | AFI Collection</title></Helmet>
+      
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <div className="bg-afi-green text-white p-4">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 className="text-xl font-bold"><FontAwesomeIcon icon={faChartLine} className="mr-2" /> Administration AFI Collection</h1>
-            <button onClick={handleLogout} className="bg-white/20 px-4 py-2 rounded-lg"><FontAwesomeIcon icon={faSignOutAlt} className="mr-2" /> Déconnexion</button>
+        <header className="bg-afi-green shadow-lg sticky top-0 z-40">
+          <div className="px-6 py-4 flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-serif font-bold text-white">AFI Collection Admin</h1>
+              <p className="text-sm text-white/80">Bienvenue, {user?.name || 'Administrateur'} {user?.role === 'admin' && <span className="ml-2 bg-white/20 px-2 py-0.5 rounded text-xs">Admin</span>}</p>
+            </div>
+            <button onClick={handleLogout} className="bg-white text-afi-green px-4 py-2 rounded font-semibold hover:bg-gray-100">Déconnexion</button>
+          </div>
+        </header>
+
+        <div className="bg-white dark:bg-gray-800 shadow-md overflow-x-auto sticky top-[72px] z-30">
+          <div className="px-6 flex gap-1">
+            {[
+              { id: 'dashboard', label: 'Tableau de bord', icon: faTachometerAlt },
+              { id: 'products', label: 'Produits', icon: faBox, count: stats.totalProducts },
+              { id: 'orders', label: 'Commandes', icon: faShoppingCart, count: stats.totalOrders },
+              { id: 'users', label: 'Utilisateurs', icon: faUsers, count: stats.totalUsers },
+              { id: 'messages', label: 'Messages', icon: faEnvelope, count: stats.totalMessages },
+              { id: 'testimonials', label: 'Témoignages', icon: faStar },
+              { id: 'formations', label: 'Formations', icon: faGraduationCap },
+              { id: 'settings', label: 'Paramètres', icon: faCog }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-3 font-medium transition-colors flex items-center gap-2 ${
+                  activeTab === tab.id ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-600 dark:text-gray-400 hover:text-gray-800'
+                }`}
+              >
+                <FontAwesomeIcon icon={tab.icon} />
+                <span>{tab.label}</span>
+                {tab.count !== undefined && <span className="ml-1 text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">{tab.count}</span>}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto p-6">
-          <div className="flex gap-2 mb-6 border-b flex-wrap">
-            <button onClick={() => setActiveTab('products')} className={`px-4 py-2 font-semibold ${activeTab === 'products' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faBox} className="mr-1" /> Produits ({products.length})</button>
-            <button onClick={() => setActiveTab('news')} className={`px-4 py-2 font-semibold ${activeTab === 'news' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faNewspaper} className="mr-1" /> Actualités ({news.length})</button>
-            <button onClick={() => setActiveTab('formations')} className={`px-4 py-2 font-semibold ${activeTab === 'formations' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faGraduationCap} className="mr-1" /> Formations ({formations.length})</button>
-            <button onClick={() => setActiveTab('testimonials')} className={`px-4 py-2 font-semibold ${activeTab === 'testimonials' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faVideo} className="mr-1" /> Témoignages ({testimonials.length})</button>
-            <button onClick={() => setActiveTab('gallery')} className={`px-4 py-2 font-semibold ${activeTab === 'gallery' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faImage} className="mr-1" /> Galerie ({gallery.length})</button>
-            <button onClick={() => setActiveTab('events')} className={`px-4 py-2 font-semibold ${activeTab === 'events' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faCalendarAlt} className="mr-1" /> Événements ({events.length})</button>
-            <button onClick={() => setActiveTab('donations')} className={`px-4 py-2 font-semibold ${activeTab === 'donations' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faHeart} className="mr-1" /> Dons ({donations.length})</button>
-            <button onClick={() => setActiveTab('orders')} className={`px-4 py-2 font-semibold ${activeTab === 'orders' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faShoppingCart} className="mr-1" /> Commandes ({orders.length})</button>
-            <button onClick={() => setActiveTab('messages')} className={`px-4 py-2 font-semibold ${activeTab === 'messages' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faEnvelope} className="mr-1" /> Messages ({unreadCount})</button>
-            <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 font-semibold ${activeTab === 'settings' ? 'border-b-2 border-afi-green text-afi-green' : 'text-gray-500'}`}><FontAwesomeIcon icon={faCog} className="mr-1" /> Paramètres</button>
-          </div>
+        <div className="p-6">
+          {/* Dashboard */}
+          {activeTab === 'dashboard' && (
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"><div className="text-3xl mb-2"><FontAwesomeIcon icon={faMoneyBillWave} className="text-afi-green" /></div><div className="text-2xl font-bold text-afi-green">{stats.totalRevenue.toLocaleString()} FCFA</div><div className="text-gray-500">Chiffre d'affaires</div></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"><div className="text-3xl mb-2"><FontAwesomeIcon icon={faBox} /></div><div className="text-2xl font-bold">{stats.totalProducts}</div><div className="text-gray-500">Produits</div>{stats.lowStock > 0 && <div className="text-sm text-red-500 mt-1">⚠️ {stats.lowStock} stock faible</div>}</div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"><div className="text-3xl mb-2"><FontAwesomeIcon icon={faShoppingCart} /></div><div className="text-2xl font-bold">{stats.totalOrders}</div><div className="text-gray-500">Commandes</div>{stats.pendingOrders > 0 && <div className="text-sm text-orange-500">⏳ {stats.pendingOrders} en attente</div>}</div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"><div className="text-3xl mb-2"><FontAwesomeIcon icon={faUsers} /></div><div className="text-2xl font-bold">{stats.totalUsers}</div><div className="text-gray-500">Utilisateurs</div></div>
+              </div>
 
-          {/* PRODUITS */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow"><div className="p-4 border-b font-semibold flex items-center gap-2"><FontAwesomeIcon icon={faShoppingCart} /> Dernières commandes</div><div className="p-4">{orders.slice(0,5).map(order => (<div key={order.id} className="flex justify-between items-center py-2 border-b last:border-0"><div><div className="font-medium">#{order.id} - {order.customerName}</div><div className="text-sm text-gray-500">{order.total?.toLocaleString()} FCFA</div></div><span className={`px-2 py-1 text-xs rounded ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>{order.status}</span></div>))}</div></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow"><div className="p-4 border-b font-semibold flex items-center gap-2"><FontAwesomeIcon icon={faEnvelope} /> Derniers messages</div><div className="p-4">{messages.slice(0,5).map(msg => (<div key={msg.id} className="py-2 border-b last:border-0"><div className="font-medium">{msg.name} - {msg.email}</div><div className="text-sm text-gray-600 truncate">{msg.message}</div></div>))}</div></div>
+              </div>
+            </div>
+          )}
+
+          {/* Produits */}
           {activeTab === 'products' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border-2 border-afi-green">
-              <div className="p-4 border-b"><h2 className="font-bold text-lg">Liste des produits</h2></div>
-              <div className="overflow-x-auto">
-                <table className="w-full"><thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3">Image</th><th className="p-3">Nom</th><th className="p-3">Prix</th><th className="p-3">Catégorie</th><th className="p-3">Actions</th></tr></thead>
-                  <tbody>{products.map(p => (<tr key={p.id} className="border-t"><td className="p-3">{p.thumbnail ? <img src={`${IMAGE_URL}${p.thumbnail}`} className="w-12 h-12 object-cover rounded" /> : p.image ? <img src={`${IMAGE_URL}${p.image}`} className="w-12 h-12 object-cover rounded" /> : <FontAwesomeIcon icon={faBox} className="text-2xl text-gray-400" />}</td><td className="p-3">{p.name}</td><td className="p-3">{p.price.toLocaleString('fr-FR')} FCFA</td><td className="p-3">{p.category}</td><td className="p-3"><button className="text-blue-500 mr-2"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => deleteProduct(p.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></td></tr>))}</tbody>
+            <div>
+              <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Gestion des produits</h2><button onClick={() => { setSelectedItem(null); setModalType('product'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3 text-left">Icône</th><th className="p-3 text-left">Nom</th><th className="p-3 text-left">Catégorie</th><th className="p-3 text-right">Prix</th><th className="p-3 text-center">Stock</th><th className="p-3 text-center">Actions</th></tr></thead>
+                  <tbody>{products.map(product => (<tr key={product.id} className="border-t"><td className="p-3">{product.icon}</td><td className="p-3 font-medium">{product.name}</td><td className="p-3">{product.category}</td><td className="p-3 text-right">{product.price?.toLocaleString()} FCFA</td><td className={`p-3 text-center ${product.stock < 5 ? 'text-red-500 font-bold' : ''}`}>{product.stock}</td><td className="p-3 text-center"><button onClick={() => { setSelectedItem(product); setModalType('product'); setShowModal(true); }} className="text-blue-500 mr-2"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => setShowConfirmDelete({ id: product.id, type: 'product' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></td></tr>))}</tbody>
                 </table>
               </div>
             </div>
           )}
 
-          {/* ACTUALITÉS */}
-          {activeTab === 'news' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <h2 className="font-bold text-lg mb-4">Actualités</h2>
-              {news.map(n => (<div key={n.id} className="flex justify-between items-center p-3 border-b"><div><span className="font-semibold">{n.title}</span><p className="text-sm text-gray-500">{n.date}</p></div><div><button className="text-blue-500 mr-3"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => deleteNews(n.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div></div>))}
-            </div>
-          )}
-
-          {/* FORMATIONS */}
-          {activeTab === 'formations' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <h2 className="font-bold text-lg mb-4">Formations</h2>
-              {formations.map(f => (<div key={f.id} className="flex justify-between items-center p-3 border-b"><div><span className="font-semibold">{f.name}</span><p className="text-sm text-gray-500">{f.duration} - {f.price}</p></div><div><button className="text-blue-500 mr-3"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => deleteFormation(f.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div></div>))}
-            </div>
-          )}
-
-          {/* TÉMOIGNAGES */}
-          {activeTab === 'testimonials' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <h2 className="font-bold text-lg mb-4">Témoignages</h2>
-              {testimonials.map(t => (<div key={t.id} className="flex justify-between items-center p-3 border-b"><div><span className="font-semibold">{t.name}</span><p className="text-sm text-gray-500">{t.role}</p><p className="text-xs text-afi-green">Note: {t.note}⭐</p></div><div><button className="text-blue-500 mr-3"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => deleteTestimonial(t.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div></div>))}
-            </div>
-          )}
-
-          {/* GALERIE */}
-          {activeTab === 'gallery' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <div className="flex justify-between items-center mb-4"><h2 className="font-bold text-lg">Galerie</h2><button onClick={() => setShowAddForm(!showAddForm)} className="bg-afi-green text-white px-4 py-2 rounded-lg"><FontAwesomeIcon icon={faPlus} /> Ajouter</button></div>
-              {showAddForm && (<div className="mb-6 p-4 bg-gray-50 rounded-lg"><form onSubmit={addGalleryItem} className="space-y-3"><input type="text" placeholder="Titre" className="w-full p-2 border rounded" value={newGalleryItem.title} onChange={(e) => setNewGalleryItem({...newGalleryItem, title: e.target.value})} required /><input type="text" placeholder="Description" className="w-full p-2 border rounded" value={newGalleryItem.description} onChange={(e) => setNewGalleryItem({...newGalleryItem, description: e.target.value})} required /><select className="w-full p-2 border rounded" value={newGalleryItem.category} onChange={(e) => setNewGalleryItem({...newGalleryItem, category: e.target.value})}><option value="afisac">AFISAC</option><option value="textile">Textile</option><option value="mode">Mode</option><option value="agro">Agro</option><option value="formation">Formation</option><option value="evenements">Événements</option></select><input type="text" placeholder="URL image" className="w-full p-2 border rounded" value={newGalleryItem.image} onChange={(e) => setNewGalleryItem({...newGalleryItem, image: e.target.value})} required /><button type="submit" className="bg-afi-green text-white px-4 py-2 rounded-lg">Ajouter</button><button type="button" onClick={() => setShowAddForm(false)} className="ml-2 bg-gray-500 text-white px-4 py-2 rounded-lg">Annuler</button></form></div>)}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{gallery.map(item => (<div key={item.id} className="border rounded-lg p-2 relative group"><img src={item.image} alt={item.title} className="w-full h-32 object-cover rounded mb-2" /><p className="font-semibold text-sm truncate">{item.title}</p><p className="text-xs text-gray-500">{item.category}</p><button onClick={() => deleteGalleryItem(item.id)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><FontAwesomeIcon icon={faTrash} className="text-xs" /></button></div>))}</div>
-            </div>
-          )}
-
-          {/* ÉVÉNEMENTS */}
-          {activeTab === 'events' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <div className="flex justify-between items-center mb-4"><h2 className="font-bold text-lg">Événements</h2><button onClick={() => setShowAddEventForm(!showAddEventForm)} className="bg-afi-green text-white px-4 py-2 rounded-lg"><FontAwesomeIcon icon={faPlus} /> Ajouter</button></div>
-              {showAddEventForm && (<div className="mb-6 p-4 bg-gray-50 rounded-lg"><form onSubmit={addEvent} className="space-y-3"><input type="text" placeholder="Titre" className="w-full p-2 border rounded" value={newEvent.title} onChange={(e) => setNewEvent({...newEvent, title: e.target.value})} required /><input type="text" placeholder="Lieu" className="w-full p-2 border rounded" value={newEvent.location} onChange={(e) => setNewEvent({...newEvent, location: e.target.value})} required /><input type="text" placeholder="Date" className="w-full p-2 border rounded" value={newEvent.date} onChange={(e) => setNewEvent({...newEvent, date: e.target.value})} required /><select className="w-full p-2 border rounded" value={newEvent.type} onChange={(e) => setNewEvent({...newEvent, type: e.target.value})}><option value="Foire">Foire</option><option value="Salon">Salon</option><option value="Distinction">Distinction</option><option value="Cérémonie">Cérémonie</option></select><textarea placeholder="Description" rows="3" className="w-full p-2 border rounded" value={newEvent.description} onChange={(e) => setNewEvent({...newEvent, description: e.target.value})} required /><input type="number" placeholder="Année" className="w-full p-2 border rounded" value={newEvent.year} onChange={(e) => setNewEvent({...newEvent, year: e.target.value})} required /><input type="number" placeholder="Participants" className="w-full p-2 border rounded" value={newEvent.participants} onChange={(e) => setNewEvent({...newEvent, participants: e.target.value})} /><input type="text" placeholder="URL image" className="w-full p-2 border rounded" value={newEvent.image} onChange={(e) => setNewEvent({...newEvent, image: e.target.value})} /><button type="submit" className="bg-afi-green text-white px-4 py-2 rounded-lg">Ajouter</button><button type="button" onClick={() => setShowAddEventForm(false)} className="ml-2 bg-gray-500 text-white px-4 py-2 rounded-lg">Annuler</button></form></div>)}
-              
-              {showEditEventForm && selectedEvent && (<div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border-2 border-afi-yellow"><h3 className="font-bold mb-3">Modifier l'événement</h3><form onSubmit={updateEvent} className="space-y-3"><input type="text" placeholder="Titre" className="w-full p-2 border rounded" value={editEvent.title} onChange={(e) => setEditEvent({...editEvent, title: e.target.value})} required /><input type="text" placeholder="Lieu" className="w-full p-2 border rounded" value={editEvent.location} onChange={(e) => setEditEvent({...editEvent, location: e.target.value})} required /><input type="text" placeholder="Date" className="w-full p-2 border rounded" value={editEvent.date} onChange={(e) => setEditEvent({...editEvent, date: e.target.value})} required /><select className="w-full p-2 border rounded" value={editEvent.type} onChange={(e) => setEditEvent({...editEvent, type: e.target.value})}><option value="Foire">Foire</option><option value="Salon">Salon</option><option value="Distinction">Distinction</option><option value="Cérémonie">Cérémonie</option></select><textarea placeholder="Description" rows="3" className="w-full p-2 border rounded" value={editEvent.description} onChange={(e) => setEditEvent({...editEvent, description: e.target.value})} required /><input type="number" placeholder="Année" className="w-full p-2 border rounded" value={editEvent.year} onChange={(e) => setEditEvent({...editEvent, year: e.target.value})} required /><input type="number" placeholder="Participants" className="w-full p-2 border rounded" value={editEvent.participants} onChange={(e) => setEditEvent({...editEvent, participants: e.target.value})} /><input type="text" placeholder="URL image" className="w-full p-2 border rounded" value={editEvent.image} onChange={(e) => setEditEvent({...editEvent, image: e.target.value})} /><button type="submit" className="bg-afi-yellow text-black px-4 py-2 rounded-lg"><FontAwesomeIcon icon={faSave} className="mr-1" /> Enregistrer</button><button type="button" onClick={cancelEditEvent} className="ml-2 bg-gray-500 text-white px-4 py-2 rounded-lg">Annuler</button></form></div>)}
-              
-              <div className="space-y-3">{events.map(event => (<div key={event.id} className="border rounded-lg p-3 flex justify-between items-center"><div><p className="font-semibold">{event.title}</p><p className="text-sm text-gray-500">{event.date} - {event.location}</p><span className={`text-xs px-2 py-0.5 rounded-full ${event.type === 'Distinction' ? 'bg-yellow-100 text-yellow-800' : event.type === 'Foire' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>{event.type}</span></div><div><button onClick={() => startEditEvent(event)} className="text-blue-500 mr-2"><FontAwesomeIcon icon={faEdit} /> Modifier</button><button onClick={() => deleteEvent(event.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /> Supprimer</button></div></div>))}</div>
-            </div>
-          )}
-
-          {/* DONS */}
-          {activeTab === 'donations' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <div className="mb-4 p-4 bg-gradient-to-r from-afi-green to-afi-green-dark rounded-lg text-white">
-                <h3 className="font-bold text-lg">Total collecté</h3>
-                <p className="text-3xl font-bold">{totalDonations.toLocaleString('fr-FR')} FCFA</p>
-                <p className="text-sm opacity-80">{donations.length} donateurs</p>
-              </div>
-              <h2 className="font-bold text-lg mb-4">Liste des dons</h2>
-              {donations.length === 0 ? <p className="text-center text-gray-500">Aucun don pour le moment</p> : (
-                <div className="space-y-3">{donations.map(d => (<div key={d.id} className="border rounded-lg p-3 flex justify-between items-center"><div><p className="font-semibold">{d.name || 'Anonyme'}</p><p className="text-sm text-gray-500">{d.amount?.toLocaleString('fr-FR')} FCFA - {d.cause || 'Général'}</p><p className="text-xs text-gray-400">{new Date(d.createdAt).toLocaleDateString('fr-FR')}</p></div><button onClick={() => deleteDonation(d.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /> Supprimer</button></div>))}</div>
-              )}
-            </div>
-          )}
-
-          {/* COMMANDES */}
+          {/* Commandes */}
           {activeTab === 'orders' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border-2 border-afi-green">
-              <div className="p-4 border-b"><h2 className="font-bold text-lg">Commandes</h2></div>
-              <div className="overflow-x-auto"><table className="w-full"><thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3">N°</th><th className="p-3">Client</th><th className="p-3">Total</th><th className="p-3">Statut</th><th className="p-3">Actions</th></tr></thead>
-              <tbody>{orders.map(order => { const statusInfo = getStatusBadge(order.status); return (<tr key={order.id} className="border-t"><td className="p-3 font-mono text-sm">{order.orderNumber}</td><td className="p-3">{order.customerName}</td><td className="p-3">{order.total.toLocaleString('fr-FR')} FCFA</td><td className="p-3"><span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusInfo.color}`}><FontAwesomeIcon icon={statusInfo.icon} /> {statusInfo.label}</span></td><td className="p-3"><select onChange={(e) => updateOrderStatus(order.id, e.target.value)} className="text-sm border rounded px-2 py-1"><option value="pending">En attente</option><option value="confirmed">Confirmée</option><option value="shipped">Expédiée</option><option value="delivered">Livrée</option><option value="cancelled">Annulée</option></select><button onClick={() => deleteOrder(order.id)} className="ml-2 text-red-500"><FontAwesomeIcon icon={faTrash} /> Supprimer</button></td></tr>);})}</tbody>
-              </table></div></div>
+            <div>
+              <h2 className="text-xl font-bold mb-4">Gestion des commandes</h2>
+              <div className="space-y-4">{orders.map(order => (<div key={order.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between items-start"><div><div className="font-mono text-afi-green">#{order.id}</div><div className="font-semibold">{order.customerName}</div><div className="text-sm text-gray-500">{order.customerPhone}</div></div><div className="text-right"><div className="font-bold text-afi-green">{order.total?.toLocaleString()} FCFA</div><select value={order.status} onChange={e => handleUpdateOrderStatus(order.id, e.target.value)} className="mt-2 p-1 border rounded text-sm"><option value="pending">En attente</option><option value="confirmed">Confirmée</option><option value="processing">En traitement</option><option value="shipped">Expédiée</option><option value="delivered">Livrée</option><option value="cancelled">Annulée</option></select></div></div></div>))}</div>
+            </div>
           )}
 
-          {/* MESSAGES */}
-          {activeTab === 'messages' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border-2 border-afi-green">
-                <div className="p-4 border-b"><h2 className="font-bold text-lg">Messages ({messages.length})</h2></div>
-                <div className="divide-y max-h-[600px] overflow-y-auto">{messages.length === 0 ? <div className="p-8 text-center">Aucun message</div> : messages.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).map(msg => (<div key={msg.id} onClick={() => { setSelectedMessage(msg); if(!msg.isRead) markMessageAsRead(msg.id); }} className={`p-4 cursor-pointer hover:bg-gray-50 ${!msg.isRead ? 'border-l-4 border-afi-green bg-afi-green/5' : ''}`}><p className="font-semibold">{msg.name}</p><p className="text-xs text-gray-500">{msg.email}</p><p className="text-sm text-gray-600 mt-2 line-clamp-2">{msg.message}</p><p className="text-xs text-gray-400 mt-2">{new Date(msg.createdAt).toLocaleDateString('fr-FR')}</p></div>))}</div>
-              </div>
-              <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border-2 border-afi-green">
-                {selectedMessage ? (<div><div className="p-4 border-b flex justify-between"><h2 className="font-bold text-lg">Détail</h2><button onClick={() => deleteMessage(selectedMessage.id)} className="text-red-500"><FontAwesomeIcon icon={faTrash} /> Supprimer</button></div><div className="p-6"><div className="grid grid-cols-2 gap-4"><div><label>Nom</label><p className="font-semibold">{selectedMessage.name}</p></div><div><label>Email</label><p>{selectedMessage.email}</p></div><div><label>Téléphone</label><p>{selectedMessage.phone || 'Non renseigné'}</p></div><div><label>Objet</label><p>{selectedMessage.subject}</p></div></div><div className="mt-4"><label>Message</label><p className="mt-1 p-3 bg-gray-50 rounded-lg">{selectedMessage.message}</p></div><div className="mt-4"><a href={`mailto:${selectedMessage.email}`} className="bg-afi-green text-white px-4 py-2 rounded-lg inline-flex items-center gap-2"><FontAwesomeIcon icon={faEnvelope} /> Répondre</a></div></div></div>) : (<div className="flex items-center justify-center h-64 text-gray-500"><div className="text-center"><FontAwesomeIcon icon={faEnvelopeOpen} className="text-5xl mb-3" /><p>Sélectionnez un message</p></div></div>)}
+          {/* Utilisateurs */}
+          {activeTab === 'users' && (
+            <div>
+              <h2 className="text-xl font-bold mb-4">Gestion des utilisateurs</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
+                <table className="w-full"><thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3 text-left">Nom</th><th className="p-3 text-left">Email</th><th className="p-3 text-left">Rôle</th><th className="p-3 text-center">Actions</th></tr></thead><tbody>{users.map(u => (<tr key={u.id} className="border-t"><td className="p-3">{u.name}</td><td className="p-3">{u.email}</td><td className="p-3"><span className={`px-2 py-1 text-xs rounded ${u.role === 'admin' ? 'bg-afi-green text-white' : 'bg-gray-200'}`}>{u.role || 'client'}</span></td><td className="p-3 text-center"><button onClick={() => setShowConfirmDelete({ id: u.id, type: 'user' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></td></tr>))}</tbody></table>
               </div>
             </div>
           )}
 
-          {/* PARAMÈTRES */}
+          {/* Messages */}
+          {activeTab === 'messages' && (
+            <div>
+              <h2 className="text-xl font-bold mb-4">Messages de contact</h2>
+              <div className="space-y-4">{messages.map(msg => (<div key={msg.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between"><div><div className="font-semibold">{msg.name}</div><div className="text-sm text-afi-green">{msg.email}</div><div className="text-sm text-gray-500">{msg.phone}</div></div><button onClick={() => setShowConfirmDelete({ id: msg.id, type: 'message' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div><div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded">{msg.message}</div></div>))}</div>
+            </div>
+          )}
+
+          {/* Témoignages */}
+          {activeTab === 'testimonials' && (
+            <div>
+              <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Témoignages clients</h2><button onClick={() => { setSelectedItem(null); setModalType('testimonial'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{testimonials.map(t => (<div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between items-start"><div><div className="font-semibold">{t.name}</div><div className="text-sm text-gray-500">{t.role}</div></div><button onClick={() => setShowConfirmDelete({ id: t.id, type: 'testimonial' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div><div className="mt-2 text-gray-600">{t.content}</div><div className="mt-2 text-afi-green">{'⭐'.repeat(t.rating || 5)}</div></div>))}</div>
+            </div>
+          )}
+
+          {/* Formations */}
+          {activeTab === 'formations' && (
+            <div>
+              <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Formations CFP Dorcas</h2><button onClick={() => { setSelectedItem(null); setModalType('formation'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{formations.map(f => (<div key={f.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between"><h3 className="font-bold text-lg">{f.name}</h3><button onClick={() => setShowConfirmDelete({ id: f.id, type: 'formation' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div><p className="text-gray-600 text-sm mt-1">{f.description}</p><div className="mt-2 flex justify-between text-sm"><span>Durée: {f.duration}</span><span className="font-bold text-afi-green">{f.price} FCFA</span></div></div>))}</div>
+            </div>
+          )}
+
+          {/* Paramètres */}
           {activeTab === 'settings' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-2 border-afi-green">
-              <h2 className="font-bold text-lg mb-4"><FontAwesomeIcon icon={faCog} className="mr-2" /> Paramètres du site</h2>
-              <form onSubmit={updateSettings} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div><label className="block text-sm font-medium mb-1">Nom du site</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.siteName} onChange={(e) => setSettings({...settings, siteName: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Slogan</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.slogan} onChange={(e) => setSettings({...settings, slogan: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Logo (URL)</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.logo} onChange={(e) => setSettings({...settings, logo: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Favicon (URL)</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.favicon} onChange={(e) => setSettings({...settings, favicon: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Email de contact</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactEmail} onChange={(e) => setSettings({...settings, contactEmail: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Téléphone principal</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.phone} onChange={(e) => setSettings({...settings, phone: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Téléphone secondaire</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.phone2} onChange={(e) => setSettings({...settings, phone2: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Adresse</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.address} onChange={(e) => setSettings({...settings, address: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">Horaires d'ouverture</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.openingHours} onChange={(e) => setSettings({...settings, openingHours: e.target.value})} /></div>
-                  <div><label className="block text-sm font-medium mb-1">URL Google Maps</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.mapUrl} onChange={(e) => setSettings({...settings, mapUrl: e.target.value})} /></div>
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><FontAwesomeIcon icon={faCog} /> Paramètres du site</h2>
+              
+              <div className="space-y-6">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faGlobe} /> Informations générales</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label className="block mb-1 text-sm font-medium">Nom du site</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Description</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.siteDescription} onChange={e => setSettings({...settings, siteDescription: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Email de contact</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactEmail} onChange={e => setSettings({...settings, contactEmail: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Téléphone</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactPhone} onChange={e => setSettings({...settings, contactPhone: e.target.value})} /></div>
+                    <div className="md:col-span-2"><label className="block mb-1 text-sm font-medium">Adresse</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactAddress} onChange={e => setSettings({...settings, contactAddress: e.target.value})} /></div>
+                  </div>
                 </div>
 
-                <div className="border-t pt-4"><h3 className="font-bold mb-3">Couleurs</h3><div className="grid grid-cols-3 gap-4"><div><label className="block text-sm mb-1">Couleur principale</label><input type="color" className="w-full h-10 p-1 border rounded" value={settings.primaryColor} onChange={(e) => setSettings({...settings, primaryColor: e.target.value})} /></div><div><label className="block text-sm mb-1">Couleur secondaire</label><input type="color" className="w-full h-10 p-1 border rounded" value={settings.secondaryColor} onChange={(e) => setSettings({...settings, secondaryColor: e.target.value})} /></div><div><label className="block text-sm mb-1">Couleur d'accent</label><input type="color" className="w-full h-10 p-1 border rounded" value={settings.accentColor} onChange={(e) => setSettings({...settings, accentColor: e.target.value})} /></div></div></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faPalette} /> Apparence</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label className="block mb-1 text-sm font-medium">Couleur principale</label><input type="color" className="w-full h-10 border rounded" value={settings.primaryColor} onChange={e => setSettings({...settings, primaryColor: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Couleur secondaire</label><input type="color" className="w-full h-10 border rounded" value={settings.secondaryColor} onChange={e => setSettings({...settings, secondaryColor: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Police</label><select className="w-full p-2 border rounded" value={settings.fontFamily} onChange={e => setSettings({...settings, fontFamily: e.target.value})}><option>Cormorant Garamond</option><option>Poppins</option><option>Roboto</option><option>Open Sans</option></select></div>
+                  </div>
+                </div>
 
-                <div className="border-t pt-4"><h3 className="font-bold mb-3">Réseaux sociaux</h3><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div><label className="block text-sm mb-1"><FontAwesomeIcon icon={faFacebookF} className="mr-1" /> Facebook</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.facebook} onChange={(e) => setSettings({...settings, facebook: e.target.value})} /></div><div><label className="block text-sm mb-1"><FontAwesomeIcon icon={faInstagram} className="mr-1" /> Instagram</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.instagram} onChange={(e) => setSettings({...settings, instagram: e.target.value})} /></div><div><label className="block text-sm mb-1"><FontAwesomeIcon icon={faTwitter} className="mr-1" /> Twitter</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.twitter} onChange={(e) => setSettings({...settings, twitter: e.target.value})} /></div><div><label className="block text-sm mb-1"><FontAwesomeIcon icon={faWhatsapp} className="mr-1" /> WhatsApp</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.whatsapp} onChange={(e) => setSettings({...settings, whatsapp: e.target.value})} /></div></div></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faShareAlt} /> Réseaux sociaux</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faFacebook} className="mr-1" /> Facebook</label><input type="url" className="w-full p-2 border rounded" value={settings.facebook} onChange={e => setSettings({...settings, facebook: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faInstagram} className="mr-1" /> Instagram</label><input type="url" className="w-full p-2 border rounded" value={settings.instagram} onChange={e => setSettings({...settings, instagram: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faTwitter} className="mr-1" /> Twitter</label><input type="url" className="w-full p-2 border rounded" value={settings.twitter} onChange={e => setSettings({...settings, twitter: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faWhatsapp} className="mr-1" /> WhatsApp</label><input type="text" className="w-full p-2 border rounded" value={settings.whatsapp} onChange={e => setSettings({...settings, whatsapp: e.target.value})} /></div>
+                  </div>
+                </div>
 
-                <div className="border-t pt-4"><h3 className="font-bold mb-3">SEO & Analytics</h3><div><label className="block text-sm mb-1">Meta Description</label><textarea rows="2" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.metaDescription} onChange={(e) => setSettings({...settings, metaDescription: e.target.value})} /></div><div><label className="block text-sm mb-1 mt-3">Meta Keywords</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.metaKeywords} onChange={(e) => setSettings({...settings, metaKeywords: e.target.value})} /></div><div><label className="block text-sm mb-1 mt-3">Code Google Analytics</label><textarea rows="2" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.googleAnalytics} onChange={(e) => setSettings({...settings, googleAnalytics: e.target.value})} /></div></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faGlobe} /> SEO</h3>
+                  <div className="space-y-3">
+                    <div><label className="block mb-1 text-sm font-medium">Meta titre</label><input type="text" className="w-full p-2 border rounded" value={settings.metaTitle} onChange={e => setSettings({...settings, metaTitle: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Meta description</label><textarea className="w-full p-2 border rounded" rows="2" value={settings.metaDescription} onChange={e => setSettings({...settings, metaDescription: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Mots-clés</label><input type="text" className="w-full p-2 border rounded" value={settings.metaKeywords} onChange={e => setSettings({...settings, metaKeywords: e.target.value})} /></div>
+                  </div>
+                </div>
 
-                <div className="border-t pt-4 flex gap-4"><label className="flex items-center gap-2"><input type="checkbox" checked={settings.newsletterActive} onChange={(e) => setSettings({...settings, newsletterActive: e.target.checked})} /> Activer la newsletter</label><label className="flex items-center gap-2"><input type="checkbox" checked={settings.maintenanceMode} onChange={(e) => setSettings({...settings, maintenanceMode: e.target.checked})} /> Mode maintenance</label></div>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faSlidersH} /> Fonctionnalités</h3>
+                  <div className="space-y-3">
+                    <label className="flex items-center justify-between p-3 border rounded"><span>Activer le panier</span><input type="checkbox" checked={settings.enableCart} onChange={e => setSettings({...settings, enableCart: e.target.checked})} /></label>
+                    <label className="flex items-center justify-between p-3 border rounded"><span>Activer les témoignages</span><input type="checkbox" checked={settings.enableTestimonials} onChange={e => setSettings({...settings, enableTestimonials: e.target.checked})} /></label>
+                    <label className="flex items-center justify-between p-3 border rounded"><span>Mode maintenance</span><input type="checkbox" checked={settings.maintenanceMode} onChange={e => setSettings({...settings, maintenanceMode: e.target.checked})} /></label>
+                  </div>
+                </div>
 
-                <button type="submit" className="bg-afi-green text-white px-6 py-2 rounded-lg hover:bg-afi-green-dark transition">Enregistrer tous les paramètres</button>
-              </form>
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faClock} /> Horaires</h3>
+                  <div className="space-y-3">
+                    <div><label className="block mb-1 text-sm font-medium">Horaires d'ouverture</label><input type="text" className="w-full p-2 border rounded" value={settings.openingHours} onChange={e => setSettings({...settings, openingHours: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Jours de fermeture</label><input type="text" className="w-full p-2 border rounded" value={settings.closingDays} onChange={e => setSettings({...settings, closingDays: e.target.value})} /></div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button onClick={handleSaveSettings} className="bg-afi-green text-white px-6 py-3 rounded-lg font-semibold"><FontAwesomeIcon icon={faSave} className="mr-2" /> Enregistrer tous les paramètres</button>
+                </div>
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {showModal && <FormModal type={modalType} item={selectedItem} onClose={() => { setShowModal(false); setSelectedItem(null); }} onSave={(data) => handleSave(data, modalType)} />}
+      
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6"><p className="mb-4">Supprimer cet élément ?</p><div className="flex justify-end gap-2"><button onClick={() => setShowConfirmDelete(null)} className="px-4 py-2 border rounded">Annuler</button><button onClick={() => handleDelete(showConfirmDelete.id, showConfirmDelete.type)} className="px-4 py-2 bg-red-500 text-white rounded">Supprimer</button></div></div>
+        </div>
+      )}
     </>
   );
 }
