@@ -164,7 +164,7 @@ function Admin() {
     try {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
-      const apiType = type === 'testimonial' ? 'testimonials' : type;
+      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : type);
       
       if (data.id) {
         await axios.put(`/api/admin/${apiType}/${data.id}`, data, { headers });
@@ -200,7 +200,7 @@ function Admin() {
   const handleDelete = async (id, type) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const apiType = type === 'testimonial' ? 'testimonials' : type;
+      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : type);
       await axios.delete(`/api/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       
       const stateMap = {
@@ -251,7 +251,7 @@ function Admin() {
     function getDefaultFormData(type) {
       switch(type) {
         case 'product':
-          return { name: '', price: '', category: 'sac', description: '', icon: '👜', stock: 0 };
+          return { name: '', price: '', category: 'sac', description: '', icon: '👜', stock: 0, cloudinaryImage: '' };
         case 'testimonial':
           return { name: '', role: '', content: '', rating: 5, active: true, videoUrl: '' };
         case 'formation':
@@ -274,6 +274,7 @@ function Admin() {
               <div><label className="block mb-1 font-medium">Icône</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} /></div>
               <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
               <div><label className="block mb-1 font-medium">Stock</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
             </>
           );
         case 'testimonial':
@@ -412,8 +413,8 @@ function Admin() {
               <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Gestion des produits</h2><button onClick={() => { setSelectedItem(null); setModalType('product'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3 text-left">Icône</th><th className="p-3 text-left">Nom</th><th className="p-3 text-left">Catégorie</th><th className="p-3 text-right">Prix</th><th className="p-3 text-center">Stock</th><th className="p-3 text-center">Actions</th></tr></thead>
-                  <tbody>{products.map(product => (<tr key={product.id} className="border-t"><td className="p-3">{product.icon}</td><td className="p-3 font-medium">{product.name}</td><td className="p-3">{product.category}</td><td className="p-3 text-right">{product.price?.toLocaleString()} FCFA</td><td className={`p-3 text-center ${product.stock < 5 ? 'text-red-500 font-bold' : ''}`}>{product.stock}</td><td className="p-3 text-center"><button onClick={() => { setSelectedItem(product); setModalType('product'); setShowModal(true); }} className="text-blue-500 mr-2"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => setShowConfirmDelete({ id: product.id, type: 'product' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></td></tr>))}</tbody>
+                  <thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3 text-left">Icône</th><th className="p-3 text-left">Nom</th><th className="p-3 text-left">Catégorie</th><th className="p-3 text-right">Prix</th><th className="p-3 text-center">Stock</th><th className="p-3 text-center">Image</th><th className="p-3 text-center">Actions</th></tr></thead>
+                  <tbody>{products.map(product => (<tr key={product.id} className="border-t"><td className="p-3">{product.icon}</td><td className="p-3 font-medium">{product.name}</td><td className="p-3">{product.category}</td><td className="p-3 text-right">{product.price?.toLocaleString()} FCFA</td><td className={`p-3 text-center ${product.stock < 5 ? 'text-red-500 font-bold' : ''}`}>{product.stock}</td><td className="p-3 text-center">{product.cloudinaryImage && <img src={product.cloudinaryImage} alt={product.name} className="w-10 h-10 object-cover rounded" />}</td><td className="p-3 text-center"><button onClick={() => { setSelectedItem(product); setModalType('product'); setShowModal(true); }} className="text-blue-500 mr-2"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => setShowConfirmDelete({ id: product.id, type: 'product' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></td></tr>))}</tbody>
                 </table>
               </div>
             </div>

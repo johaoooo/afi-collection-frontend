@@ -101,15 +101,17 @@ function Afisac() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product, index) => (
               <motion.div key={product.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }} className="bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all border-2 border-afi-green dark:border-afi-dark-border">
-                <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-afi-dark-card dark:to-afi-dark-bg">
-                  {product.thumbnail ? (
-                    <img src={`${IMAGE_URL}${product.thumbnail}`} alt={product.name} className="w-full h-full object-cover" />
-                  ) : product.image ? (
-                    <img src={`${IMAGE_URL}${product.image}`} alt={product.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <FontAwesomeIcon icon={getCategoryIcon(product.category)} className="text-6xl text-afi-green opacity-50" />
-                  )}
-                </div>
+               <div className="relative h-48 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-afi-dark-card dark:to-afi-dark-bg">
+  {product.cloudinaryImage ? (
+    <img src={product.cloudinaryImage} alt={product.name} className="w-full h-full object-cover" />
+  ) : product.thumbnail ? (
+    <img src={`${IMAGE_URL}${product.thumbnail}`} alt={product.name} className="w-full h-full object-cover" />
+  ) : product.image ? (
+    <img src={`${IMAGE_URL}${product.image}`} alt={product.name} className="w-full h-full object-cover" />
+  ) : (
+    <FontAwesomeIcon icon={getCategoryIcon(product.category)} className="text-6xl text-afi-green opacity-50" />
+  )}
+</div>
                 <div className="p-5">
                   <h3 className="font-serif text-xl font-bold text-gray-800 dark:text-white mb-1">{product.name}</h3>
                   <p className="text-gray-500 dark:text-gray-400 text-sm mb-3">{product.description}</p>
