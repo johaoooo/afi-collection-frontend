@@ -10,7 +10,6 @@ import {
   faSave, faTimes, faMoneyBillWave, faGlobe, faClock,
   faPalette, faShareAlt, faSlidersH, faImages, faDonate
 } from '@fortawesome/free-solid-svg-icons';
-// Icônes de marques (brands)
 import { faFacebook, faInstagram, faWhatsapp, faTwitter } from '@fortawesome/free-brands-svg-icons';
 
 function Admin() {
@@ -165,11 +164,12 @@ function Admin() {
     try {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
+      const apiType = type === 'testimonial' ? 'testimonials' : type;
       
       if (data.id) {
-        await axios.put(`/api/admin/${type}/${data.id}`, data, { headers });
+        await axios.put(`/api/admin/${apiType}/${data.id}`, data, { headers });
       } else {
-        const response = await axios.post(`/api/admin/${type}`, data, { headers });
+        const response = await axios.post(`/api/admin/${apiType}`, data, { headers });
         data = response.data;
       }
       
@@ -200,7 +200,8 @@ function Admin() {
   const handleDelete = async (id, type) => {
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.delete(`/api/admin/${type}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      const apiType = type === 'testimonial' ? 'testimonials' : type;
+      await axios.delete(`/api/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       
       const stateMap = {
         product: { state: products, setter: setProducts },
@@ -252,7 +253,7 @@ function Admin() {
         case 'product':
           return { name: '', price: '', category: 'sac', description: '', icon: '👜', stock: 0 };
         case 'testimonial':
-          return { name: '', role: '', content: '', rating: 5, active: true };
+          return { name: '', role: '', content: '', rating: 5, active: true, videoUrl: '' };
         case 'formation':
           return { name: '', description: '', duration: '1 mois', price: '' };
         case 'category':
@@ -281,7 +282,8 @@ function Admin() {
               <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
               <div><label className="block mb-1 font-medium">Rôle</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} /></div>
               <div><label className="block mb-1 font-medium">Témoignage</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="4" value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Note</label><select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.rating} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})}><option value="5">5 étoiles</option><option value="4">4 étoiles</option><option value="3">3 étoiles</option><option value="2">2 étoiles</option><option value="1">1 étoile</option></select></div>
+              <div><label className="block mb-1 font-medium">Lien vidéo (YouTube ou Cloudinary)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Note</label><select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.rating} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})}><option value="5">5⭐</option><option value="4">4⭐</option><option value="3">3⭐</option><option value="2">2⭐</option><option value="1">1⭐</option></select></div>
               <div><label className="flex items-center gap-2"><input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} /> Activer sur le site</label></div>
             </>
           );
@@ -390,7 +392,6 @@ function Admin() {
         </div>
 
         <div className="p-6">
-          {/* Dashboard */}
           {activeTab === 'dashboard' && (
             <div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -399,7 +400,6 @@ function Admin() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"><div className="text-3xl mb-2"><FontAwesomeIcon icon={faShoppingCart} /></div><div className="text-2xl font-bold">{stats.totalOrders}</div><div className="text-gray-500">Commandes</div>{stats.pendingOrders > 0 && <div className="text-sm text-orange-500">⏳ {stats.pendingOrders} en attente</div>}</div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"><div className="text-3xl mb-2"><FontAwesomeIcon icon={faUsers} /></div><div className="text-2xl font-bold">{stats.totalUsers}</div><div className="text-gray-500">Utilisateurs</div></div>
               </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow"><div className="p-4 border-b font-semibold flex items-center gap-2"><FontAwesomeIcon icon={faShoppingCart} /> Dernières commandes</div><div className="p-4">{orders.slice(0,5).map(order => (<div key={order.id} className="flex justify-between items-center py-2 border-b last:border-0"><div><div className="font-medium">#{order.id} - {order.customerName}</div><div className="text-sm text-gray-500">{order.total?.toLocaleString()} FCFA</div></div><span className={`px-2 py-1 text-xs rounded ${order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'delivered' ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>{order.status}</span></div>))}</div></div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow"><div className="p-4 border-b font-semibold flex items-center gap-2"><FontAwesomeIcon icon={faEnvelope} /> Derniers messages</div><div className="p-4">{messages.slice(0,5).map(msg => (<div key={msg.id} className="py-2 border-b last:border-0"><div className="font-medium">{msg.name} - {msg.email}</div><div className="text-sm text-gray-600 truncate">{msg.message}</div></div>))}</div></div>
@@ -407,7 +407,6 @@ function Admin() {
             </div>
           )}
 
-          {/* Produits */}
           {activeTab === 'products' && (
             <div>
               <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Gestion des produits</h2><button onClick={() => { setSelectedItem(null); setModalType('product'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
@@ -420,7 +419,6 @@ function Admin() {
             </div>
           )}
 
-          {/* Commandes */}
           {activeTab === 'orders' && (
             <div>
               <h2 className="text-xl font-bold mb-4">Gestion des commandes</h2>
@@ -428,7 +426,6 @@ function Admin() {
             </div>
           )}
 
-          {/* Utilisateurs */}
           {activeTab === 'users' && (
             <div>
               <h2 className="text-xl font-bold mb-4">Gestion des utilisateurs</h2>
@@ -438,7 +435,6 @@ function Admin() {
             </div>
           )}
 
-          {/* Messages */}
           {activeTab === 'messages' && (
             <div>
               <h2 className="text-xl font-bold mb-4">Messages de contact</h2>
@@ -446,15 +442,21 @@ function Admin() {
             </div>
           )}
 
-          {/* Témoignages */}
           {activeTab === 'testimonials' && (
             <div>
               <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Témoignages clients</h2><button onClick={() => { setSelectedItem(null); setModalType('testimonial'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{testimonials.map(t => (<div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between items-start"><div><div className="font-semibold">{t.name}</div><div className="text-sm text-gray-500">{t.role}</div></div><button onClick={() => setShowConfirmDelete({ id: t.id, type: 'testimonial' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div><div className="mt-2 text-gray-600">{t.content}</div><div className="mt-2 text-afi-green">{'⭐'.repeat(t.rating || 5)}</div></div>))}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{testimonials.map(t => (<div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between items-start"><div><div className="font-semibold">{t.name}</div><div className="text-sm text-gray-500">{t.role}</div></div>
+                    <div className="flex gap-2">
+                      <button onClick={() => { setSelectedItem(t); setModalType("testimonial"); setShowModal(true); }} className="text-blue-500 hover:text-blue-700">
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                      <button onClick={() => setShowConfirmDelete({ id: t.id, type: "testimonial" })} className="text-red-500 hover:text-red-700">
+                        <FontAwesomeIcon icon={faTrash} />
+                      </button>
+                    </div></div><div className="mt-2 text-gray-600">{t.content}</div><div className="mt-2 text-afi-green">{'⭐'.repeat(t.rating || 5)}</div></div>))}</div>
             </div>
           )}
 
-          {/* Formations */}
           {activeTab === 'formations' && (
             <div>
               <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Formations CFP Dorcas</h2><button onClick={() => { setSelectedItem(null); setModalType('formation'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
@@ -462,11 +464,9 @@ function Admin() {
             </div>
           )}
 
-          {/* Paramètres */}
           {activeTab === 'settings' && (
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><FontAwesomeIcon icon={faCog} /> Paramètres du site</h2>
-              
               <div className="space-y-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faGlobe} /> Informations générales</h3>
@@ -478,7 +478,6 @@ function Admin() {
                     <div className="md:col-span-2"><label className="block mb-1 text-sm font-medium">Adresse</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactAddress} onChange={e => setSettings({...settings, contactAddress: e.target.value})} /></div>
                   </div>
                 </div>
-
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faPalette} /> Apparence</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -487,7 +486,6 @@ function Admin() {
                     <div><label className="block mb-1 text-sm font-medium">Police</label><select className="w-full p-2 border rounded" value={settings.fontFamily} onChange={e => setSettings({...settings, fontFamily: e.target.value})}><option>Cormorant Garamond</option><option>Poppins</option><option>Roboto</option><option>Open Sans</option></select></div>
                   </div>
                 </div>
-
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faShareAlt} /> Réseaux sociaux</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -497,7 +495,6 @@ function Admin() {
                     <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faWhatsapp} className="mr-1" /> WhatsApp</label><input type="text" className="w-full p-2 border rounded" value={settings.whatsapp} onChange={e => setSettings({...settings, whatsapp: e.target.value})} /></div>
                   </div>
                 </div>
-
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faGlobe} /> SEO</h3>
                   <div className="space-y-3">
@@ -506,7 +503,6 @@ function Admin() {
                     <div><label className="block mb-1 text-sm font-medium">Mots-clés</label><input type="text" className="w-full p-2 border rounded" value={settings.metaKeywords} onChange={e => setSettings({...settings, metaKeywords: e.target.value})} /></div>
                   </div>
                 </div>
-
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faSlidersH} /> Fonctionnalités</h3>
                   <div className="space-y-3">
@@ -515,7 +511,6 @@ function Admin() {
                     <label className="flex items-center justify-between p-3 border rounded"><span>Mode maintenance</span><input type="checkbox" checked={settings.maintenanceMode} onChange={e => setSettings({...settings, maintenanceMode: e.target.checked})} /></label>
                   </div>
                 </div>
-
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faClock} /> Horaires</h3>
                   <div className="space-y-3">
@@ -523,7 +518,6 @@ function Admin() {
                     <div><label className="block mb-1 text-sm font-medium">Jours de fermeture</label><input type="text" className="w-full p-2 border rounded" value={settings.closingDays} onChange={e => setSettings({...settings, closingDays: e.target.value})} /></div>
                   </div>
                 </div>
-
                 <div className="flex justify-end">
                   <button onClick={handleSaveSettings} className="bg-afi-green text-white px-6 py-3 rounded-lg font-semibold"><FontAwesomeIcon icon={faSave} className="mr-2" /> Enregistrer tous les paramètres</button>
                 </div>
@@ -533,15 +527,8 @@ function Admin() {
         </div>
       </div>
 
-          {/* Galerie */}
-          {/* Dons */}
-          {activeTab === "donations" && (
-            <DonAdmin />
-          )}
-
-          {activeTab === "gallery" && (
-            <GalerieAdmin />
-          )}
+      {activeTab === "donations" && <DonAdmin />}
+      {activeTab === "gallery" && <GalerieAdmin />}
 
       {showModal && <FormModal type={modalType} item={selectedItem} onClose={() => { setShowModal(false); setSelectedItem(null); }} onSave={(data) => handleSave(data, modalType)} />}
       
