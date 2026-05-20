@@ -64,7 +64,7 @@ function Home() {
   const fetchTestimonials = async () => {
     try {
       const res = await axios.get(`${API_URL}/testimonials/active`);
-      setVideoTestimonials(res.data);
+      console.log("📹 Données reçues:", res.data); setVideoTestimonials(res.data);
     } catch (err) {
       console.error('Erreur chargement témoignages', err);
     }
@@ -266,7 +266,7 @@ function Home() {
                 {videoTestimonials.map((video, index) => (
                   <motion.div key={video.id} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.1 }} whileHover={{ y: -5 }} className="min-w-[250px] sm:min-w-[300px] md:min-w-[380px] bg-white dark:bg-afi-dark-card rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all flex-shrink-0 border-2 border-afi-green dark:border-afi-dark-border">
                     <div className="relative group cursor-pointer">
-                      <img src={video.thumbnail || 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'} alt={video.title} className="w-full h-36 sm:h-40 md:h-48 object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <iframe src={video.videoUrl || "https://www.youtube.com/embed/dQw4w9WgXcQ"} className="w-full h-36 sm:h-40 md:h-48 object-cover" frameBorder="0" allowFullScreen title={video.name || "Témoignage"}></iframe>
                       <div className="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-all flex items-center justify-center">
                         <motion.div whileHover={{ scale: 1.1 }} className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
                           <FontAwesomeIcon icon={faPlay} className="text-white text-lg sm:text-xl md:text-2xl ml-0.5 sm:ml-1" />
@@ -366,3 +366,21 @@ function Home() {
 }
 
 export default Home;
+
+// Fonction pour convertir n'importe quel lien YouTube en embed
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+  // Si c'est déjà un embed
+  if (url.includes('/embed/')) return url;
+  // Si c'est un lien watch?v=
+  if (url.includes('watch?v=')) {
+    const videoId = url.split('watch?v=')[1].split('&')[0];
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+  // Si c'est un lien youtu.be
+  if (url.includes('youtu.be/')) {
+    const videoId = url.split('youtu.be/')[1].split('?')[0];
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+  return url;
+}
