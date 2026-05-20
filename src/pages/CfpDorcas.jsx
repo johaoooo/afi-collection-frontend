@@ -24,15 +24,16 @@ function CfpDorcas() {
   }, []);
 
   const fetchFormations = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/formations`);
-      setFormations(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Erreur chargement formations', err);
-      setLoading(false);
-    }
-  };
+  try {
+    const res = await axios.get(`${API_URL}/formations`);
+    const onlyFormations = res.data.filter(f => f.type === 'formation' || !f.type);
+    setFormations(onlyFormations);
+    setLoading(false);
+  } catch (err) {
+    console.error('Erreur chargement formations', err);
+    setLoading(false);
+  }
+};
 
   const toggleFormation = (id) => {
     setOpenFormation(openFormation === id ? null : id);

@@ -29,18 +29,24 @@ function Foires() {
     fetchEvents();
   }, []);
 
-  const fetchEvents = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/events`);
-      setEvents(res.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Erreur chargement événements', err);
-      setLoading(false);
-    }
-  };
+ const fetchEvents = async () => {
+  try {
+    const res = await axios.get(`${API_URL}/formations`);
+    const onlyEvents = res.data.filter(f => f.type === 'evenement');
+    setEvents(onlyEvents);
+    console.log("📅 Événements chargés:", onlyEvents);
+    setLoading(false);
+  } catch (err) {
+    console.error('Erreur chargement événements', err);
+    setLoading(false);
+  }
+};
 
-  const currentYearEvents = events.filter(e => e.year === selectedYear);
+  const currentYearEvents = events.filter(e => {
+  if (!e.date) return false;
+  const eventYear = new Date(e.date).getFullYear();
+  return eventYear === selectedYear;
+});
 
   const openMedia = (media, type, eventTitle) => {
     setSelectedMedia({ url: media, type, title: eventTitle });
@@ -240,11 +246,15 @@ function Foires() {
                           <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
                             <span className="flex items-center gap-1">
                               <FontAwesomeIcon icon={faUsers} className="text-afi-green" />
-                              {event.participants.toLocaleString()} participants
+                             {event.participants && event.participants.toLocaleString()}
                             </span>
                             <span className="flex items-center gap-1">
                               <FontAwesomeIcon icon={faCamera} className="text-afi-green" />
-                              {event.photos.length} photos
+                             {event.photos && event.photos.slice(0, 4).map((photo, idx) => (
+  <div key={idx} className="aspect-square rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+    <img src={photo} alt={`${event.title} - ${idx + 1}`} className="w-full h-full object-cover" />
+  </div>
+))}
                             </span>
                             {event.videoUrl && (
                               <span className="flex items-center gap-1">
