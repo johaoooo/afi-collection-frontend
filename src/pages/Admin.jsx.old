@@ -7,7 +7,7 @@ import {
   faTachometerAlt, faBox, faShoppingCart, faUsers, faEnvelope, 
   faStar, faGraduationCap, faCog, faPlus, faEdit, faTrash, 
   faSave, faTimes, faMoneyBillWave, faGlobe, faClock,
-  faPalette, faShareAlt, faSlidersH, faImages
+  faPalette, faShareAlt, faSlidersH
 } from '@fortawesome/free-solid-svg-icons';
 // Icônes de marques (brands)
 import { faFacebook, faInstagram, faWhatsapp, faTwitter } from '@fortawesome/free-brands-svg-icons';
@@ -364,7 +364,6 @@ function Admin() {
             {[
               { id: 'dashboard', label: 'Tableau de bord', icon: faTachometerAlt },
               { id: 'products', label: 'Produits', icon: faBox, count: stats.totalProducts },
-              { id: 'gallery', label: 'Galerie', icon: faImages },
               { id: 'orders', label: 'Commandes', icon: faShoppingCart, count: stats.totalOrders },
               { id: 'users', label: 'Utilisateurs', icon: faUsers, count: stats.totalUsers },
               { id: 'messages', label: 'Messages', icon: faEnvelope, count: stats.totalMessages },
