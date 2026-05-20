@@ -1,4 +1,3 @@
-import DonAdmin from "../components/DonAdmin";
 import GalerieAdmin from "../components/GalerieAdmin";
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -8,7 +7,7 @@ import {
   faTachometerAlt, faBox, faShoppingCart, faUsers, faEnvelope, 
   faStar, faGraduationCap, faCog, faPlus, faEdit, faTrash, 
   faSave, faTimes, faMoneyBillWave, faGlobe, faClock,
-  faPalette, faShareAlt, faSlidersH, faImages, faDonate
+  faPalette, faShareAlt, faSlidersH, faImages
 } from '@fortawesome/free-solid-svg-icons';
 // Icônes de marques (brands)
 import { faFacebook, faInstagram, faWhatsapp, faTwitter } from '@fortawesome/free-brands-svg-icons';
@@ -366,7 +365,6 @@ function Admin() {
               { id: 'dashboard', label: 'Tableau de bord', icon: faTachometerAlt },
               { id: 'products', label: 'Produits', icon: faBox, count: stats.totalProducts },
               { id: 'gallery', label: 'Galerie', icon: faImages },
-              { id: 'donations', label: 'Dons', icon: faDonate },
               { id: 'orders', label: 'Commandes', icon: faShoppingCart, count: stats.totalOrders },
               { id: 'users', label: 'Utilisateurs', icon: faUsers, count: stats.totalUsers },
               { id: 'messages', label: 'Messages', icon: faEnvelope, count: stats.totalMessages },
@@ -534,11 +532,6 @@ function Admin() {
       </div>
 
           {/* Galerie */}
-          {/* Dons */}
-          {activeTab === "donations" && (
-            <DonAdmin />
-          )}
-
           {activeTab === "gallery" && (
             <GalerieAdmin />
           )}
