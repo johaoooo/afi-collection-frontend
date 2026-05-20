@@ -73,23 +73,31 @@ function Admin() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    const userData = localStorage.getItem('adminUser');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setIsLoggedIn(true);
-        setUser(parsedUser);
-        fetchAllData();
-      } catch (e) {
-        localStorage.removeItem('adminToken');
-        localStorage.removeItem('adminUser');
-        setIsLoggedIn(false);
-      }
+  const token = localStorage.getItem('adminToken');
+  const userData = localStorage.getItem('adminUser');
+  
+  if (token && userData) {
+    try {
+      const parsedUser = JSON.parse(userData);
+      setIsLoggedIn(true);
+      setUser(parsedUser);
+      fetchAllData();
+    } catch (e) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminUser');
+      setIsLoggedIn(false);
     }
-    setLoading(false);
-  }, []);
+  }
+  setLoading(false);
+}, []);
+
+// Ajoute ce useEffect séparé pour les événements des boutons
+useEffect(() => {
+  const exportBtn = document.getElementById('exportMessagesBtn');
+  const markBtn = document.getElementById('markAllReadBtn');
+  if (exportBtn) exportBtn.onclick = exportMessages;
+  if (markBtn) markBtn.onclick = markAllAsRead;
+}, [messages]); // Dépend de messages pour se mettre à jour
 
   const fetchAllData = async () => {
     try {
@@ -134,6 +142,31 @@ function Admin() {
       console.error('Erreur chargement:', error);
     }
   };
+  
+  const exportMessages = () => {
+  const headers = ["Nom","Email","Telephone","Message","Date","Lu"];
+  const rows = messages.map(m => [m.name,m.email,m.phone,m.message,new Date(m.createdAt).toLocaleString(),m.read?"Oui":"Non"]);
+  const csv = [headers,...rows].map(r=>r.join(",")).join("\n");
+  const blob = new Blob([csv],{type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `messages_${new Date().toISOString().split("T")[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+const markAllAsRead = async () => {
+  const token = localStorage.getItem('adminToken');
+  for (const msg of messages) {
+    if (!msg.read) {
+      await axios.put(`/api/admin/messages/${msg.id}`, { read: true }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
+  }
+  fetchAllData();
+};
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -202,6 +235,18 @@ function Admin() {
       const token = localStorage.getItem('adminToken');
       const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : type));
       await axios.delete(`/api/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      
+      const handleMarkAsRead = async (id) => {
+  try {
+    const token = localStorage.getItem('adminToken');
+    await axios.put(`/api/admin/messages/${id}`, { read: true }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchAllData();
+  } catch (error) {
+    console.error('Erreur', error);
+  }
+};
       
       const stateMap = {
         product: { state: products, setter: setProducts },
@@ -453,12 +498,42 @@ function Admin() {
             </div>
           )}
 
-          {activeTab === 'messages' && (
-            <div>
-              <h2 className="text-xl font-bold mb-4">Messages de contact</h2>
-              <div className="space-y-4">{messages.map(msg => (<div key={msg.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between"><div><div className="font-semibold">{msg.name}</div><div className="text-sm text-afi-green">{msg.email}</div><div className="text-sm text-gray-500">{msg.phone}</div></div><button onClick={() => setShowConfirmDelete({ id: msg.id, type: 'message' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div><div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded">{msg.message}</div></div>))}</div>
+        {activeTab === 'messages' && (
+  <div>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-bold">✉️ Messages</h2>
+      <div className="flex gap-2">
+        <button id="exportMessagesBtn" className="bg-afi-green text-white px-4 py-2 rounded text-sm">📥 Exporter CSV</button>
+        <button id="markAllReadBtn" className="border border-afi-green text-afi-green px-4 py-2 rounded text-sm">✓ Marquer tout lu</button>
+      </div>
+    </div>
+    <div className="space-y-4" id="messagesList">
+      {messages.length === 0 ? (
+        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+          <p className="text-gray-500">Aucun message</p>
+        </div>
+      ) : (
+        messages.map(msg => (
+          <div key={msg.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 ${!msg.read ? 'border-l-4 border-afi-green' : ''}`}>
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <p className="font-semibold">{msg.name} - {msg.email}</p>
+                <p className="text-sm text-gray-500">{msg.phone}</p>
+                <p className="mt-2">{msg.message}</p>
+                <p className="text-xs text-gray-400 mt-2">{new Date(msg.createdAt).toLocaleString()}</p>
+              </div>
+              <div className="flex gap-2">
+                <a href={`https://wa.me/${msg.phone?.replace(/\D/g, '')}`} target="_blank" className="text-green-500 text-sm">💬</a>
+                <a href={`mailto:${msg.email}`} className="text-blue-500 text-sm">✉️</a>
+                <button onClick={() => setShowConfirmDelete({ id: msg.id, type: 'message' })} className="text-red-500 text-sm">🗑️</button>
+              </div>
             </div>
-          )}
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+)}
 
           {activeTab === 'testimonials' && (
             <div>
