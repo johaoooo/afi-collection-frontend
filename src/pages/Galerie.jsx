@@ -193,7 +193,7 @@ function Galerie() {
                 >
                   <div className="relative overflow-hidden h-52">
                     <img
-                      src={item.thumbnail || item.image}
+                      src={item.cloudinaryUrl || item.thumbnail || item.image}
                       alt={item.title}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
@@ -307,7 +307,7 @@ function Galerie() {
             </button>
             <div className="max-w-3xl max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
               <img
-                src={selectedImage.image}
+                src={selectedImage.cloudinaryUrl || selectedImage.image}
                 alt={selectedImage.title}
                 className="rounded-xl shadow-2xl max-h-[80vh] object-contain"
               />
