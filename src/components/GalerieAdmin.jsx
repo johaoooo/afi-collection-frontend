@@ -99,11 +99,13 @@ function GalerieAdmin() {
         {items.map(item => (
           <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
             <div className="aspect-video bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-              {item.type === 'video' ? (
-                <FontAwesomeIcon icon={faYoutube} className="text-red-500 text-5xl" />
-              ) : (
-                <FontAwesomeIcon icon={faImage} className="text-blue-500 text-5xl" />
-              )}
+             {item.type === 'video' ? (
+  <FontAwesomeIcon icon={faYoutube} className="text-red-500 text-5xl" />
+) : item.cloudinaryUrl ? (
+  <img src={item.cloudinaryUrl} alt={item.title} className="w-full h-full object-cover" />
+) : (
+  <FontAwesomeIcon icon={faImage} className="text-blue-500 text-5xl" />
+)}
             </div>
             <div className="p-4">
               <h3 className="font-bold text-lg">{item.title}</h3>

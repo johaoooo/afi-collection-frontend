@@ -164,7 +164,7 @@ function Admin() {
     try {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
-      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : type);
+      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : type));
       
       if (data.id) {
         await axios.put(`/api/admin/${apiType}/${data.id}`, data, { headers });
@@ -200,7 +200,7 @@ function Admin() {
   const handleDelete = async (id, type) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : type);
+      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : type));
       await axios.delete(`/api/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       
       const stateMap = {
@@ -254,8 +254,8 @@ function Admin() {
           return { name: '', price: '', category: 'sac', description: '', icon: '👜', stock: 0, cloudinaryImage: '' };
         case 'testimonial':
           return { name: '', role: '', content: '', rating: 5, active: true, videoUrl: '' };
-        case 'formation':
-          return { name: '', description: '', duration: '1 mois', price: '' };
+       case 'formation':
+  return { name: '', description: '', duration: '1 mois', price: '', cloudinaryImage: '', videoUrl: '', type: 'formation' };
         case 'category':
           return { name: '', slug: '', icon: '📁' };
         default:
@@ -288,15 +288,32 @@ function Admin() {
               <div><label className="flex items-center gap-2"><input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} /> Activer sur le site</label></div>
             </>
           );
-        case 'formation':
-          return (
-            <>
-              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
-            </>
-          );
+       case 'formation':
+  return (
+    <>
+      <div><label className="block mb-1 font-medium">Type</label>
+        <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.type || 'formation'} onChange={e => setFormData({...formData, type: e.target.value})}>
+          <option value="formation">🎓 Formation</option>
+          <option value="evenement">📅 Événement</option>
+        </select>
+      </div>
+      <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+      <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+      {formData.type === 'formation' ? (
+        <>
+          <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
+          <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
+        </>
+      ) : (
+        <>
+          <div><label className="block mb-1 font-medium">Date de l'événement</label><input type="date" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} /></div>
+          <div><label className="block mb-1 font-medium">Lieu</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="Lieu de l'événement" value={formData.location || ''} onChange={e => setFormData({...formData, location: e.target.value})} /></div>
+        </>
+      )}
+      <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
+      <div><label className="block mb-1 font-medium">Lien vidéo (YouTube)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
+    </>
+  );
         default:
           return null;
       }
@@ -459,11 +476,40 @@ function Admin() {
           )}
 
           {activeTab === 'formations' && (
+  <div>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-bold">Gestion des formations et événements</h2>
+      <button onClick={() => { setSelectedItem(null); setModalType('formation'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {formations.map(f => (
+        <div key={f.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+          <div className="flex justify-between">
             <div>
-              <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Formations CFP Dorcas</h2><button onClick={() => { setSelectedItem(null); setModalType('formation'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{formations.map(f => (<div key={f.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between"><h3 className="font-bold text-lg">{f.name}</h3><button onClick={() => setShowConfirmDelete({ id: f.id, type: 'formation' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></div><p className="text-gray-600 text-sm mt-1">{f.description}</p><div className="mt-2 flex justify-between text-sm"><span>Durée: {f.duration}</span><span className="font-bold text-afi-green">{f.price} FCFA</span></div></div>))}</div>
+              <span className={`text-xs px-2 py-1 rounded ${f.type === 'formation' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                {f.type === 'formation' ? '🎓 Formation' : '📅 Événement'}
+              </span>
+              <h3 className="font-bold text-lg mt-1">{f.name}</h3>
             </div>
-          )}
+            <button onClick={() => setShowConfirmDelete({ id: f.id, type: 'formation' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button>
+          </div>
+          <p className="text-gray-600 text-sm mt-1">{f.description}</p>
+          {f.cloudinaryImage && <img src={f.cloudinaryImage} alt={f.name} className="w-full h-32 object-cover rounded mt-2" />}
+          <div className="mt-2 flex justify-between text-sm">
+            {f.type === 'formation' ? (
+              <><span>Durée: {f.duration}</span><span className="font-bold text-afi-green">{f.price} FCFA</span></>
+            ) : (
+              <><span>📅 {f.date}</span><span>📍 {f.location}</span></>
+            )}
+          </div>
+          <div className="flex gap-2 mt-2">
+            <button onClick={() => { setSelectedItem(f); setModalType('formation'); setShowModal(true); }} className="text-blue-500 text-sm">Modifier</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
           {activeTab === 'settings' && (
             <div className="max-w-4xl mx-auto">
