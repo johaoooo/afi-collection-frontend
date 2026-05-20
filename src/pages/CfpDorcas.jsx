@@ -150,12 +150,16 @@ function CfpDorcas() {
                         <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">{formation.description}</p>
                         <h4 className="font-semibold text-gray-800 dark:text-white text-sm mb-3">Programme :</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {formation.modules.map((module, idx) => (
-                            <div key={idx} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                              <div className="w-1.5 h-1.5 rounded-full bg-afi-green dark:bg-white"></div>
-                              {module}
-                            </div>
-                          ))}
+                          {formation.modules && formation.modules.length > 0 && (
+  <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+    <p className="text-sm font-semibold mb-2">📚 Au programme :</p>
+    <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
+      {formation.modules.map((module, idx) => (
+        <li key={idx}>{module}</li>
+      ))}
+    </ul>
+  </div>
+)}
                         </div>
                         <div className="mt-5 flex gap-3">
                           <a href="https://wa.me/2290196062287" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-afi-green text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-afi-green-dark transition-all">
