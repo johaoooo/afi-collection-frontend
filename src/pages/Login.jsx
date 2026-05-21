@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faLock, faEye, faEyeSlash, faArrowRight, faUserShield } from '@fortawesome/free-solid-svg-icons';
 import { faGoogle, faFacebookF } from '@fortawesome/free-brands-svg-icons';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 function Login() {
   const navigate = useNavigate();
@@ -17,6 +20,15 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
+  useEffect(() => {
+    // Remplir l'email sauvegardé
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail) {
+      setFormData(prev => ({ ...prev, email: rememberedEmail }));
+      setRememberMe(true);
+    }
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (errors[e.target.name]) {
@@ -27,19 +39,39 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrors({});
     
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        localStorage.setItem('user', JSON.stringify({ email: formData.email, name: 'Utilisateur' }));
-        if (rememberMe) {
-          localStorage.setItem('rememberedEmail', formData.email);
-        }
-        navigate('/');
+    try {
+      const response = await axios.post(`${API_URL}/login`, formData);
+      
+      // Sauvegarder le token et les infos utilisateur
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('adminUser', JSON.stringify(response.data.user));
+      
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', formData.email);
       } else {
-        setErrors({ general: 'Email ou mot de passe incorrect' });
+        localStorage.removeItem('rememberedEmail');
       }
+      
+      // Rediriger selon le rôle
+      const userRole = response.data.user?.role || 'client';
+      if (userRole === 'client') {
+        navigate('/dashboard');
+      } else {
+        navigate('/admin');
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        setErrors({ general: 'Email ou mot de passe incorrect' });
+      } else if (error.response?.status === 403) {
+        setErrors({ general: 'Compte désactivé' });
+      } else {
+        setErrors({ general: 'Erreur de connexion. Veuillez réessayer.' });
+      }
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (

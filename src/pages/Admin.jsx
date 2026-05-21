@@ -73,31 +73,48 @@ function Admin() {
   });
 
   useEffect(() => {
-  const token = localStorage.getItem('adminToken');
-  const userData = localStorage.getItem('adminUser');
-  
-  if (token && userData) {
-    try {
-      const parsedUser = JSON.parse(userData);
-      setIsLoggedIn(true);
-      setUser(parsedUser);
-      fetchAllData();
-    } catch (e) {
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('adminUser');
-      setIsLoggedIn(false);
+    const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+    const userData = localStorage.getItem('adminUser');
+    
+    if (token && userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setIsLoggedIn(true);
+        setUser(parsedUser);
+        fetchAllData();
+      } catch (e) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminUser');
+        setIsLoggedIn(false);
+      }
     }
-  }
-  setLoading(false);
-}, []);
+    setLoading(false);
+  }, []);
 
-// Ajoute ce useEffect séparé pour les événements des boutons
-useEffect(() => {
-  const exportBtn = document.getElementById('exportMessagesBtn');
-  const markBtn = document.getElementById('markAllReadBtn');
-  if (exportBtn) exportBtn.onclick = exportMessages;
-  if (markBtn) markBtn.onclick = markAllAsRead;
-}, [messages]); // Dépend de messages pour se mettre à jour
+  useEffect(() => {
+    const exportBtn = document.getElementById('exportMessagesBtn');
+    const markBtn = document.getElementById('markAllReadBtn');
+    if (exportBtn) exportBtn.onclick = exportMessages;
+    if (markBtn) markBtn.onclick = markAllAsRead;
+  }, [messages]);
+
+  // Filtrer les menus selon le rôle de l'utilisateur
+  const getUserMenus = () => {
+    const userRole = user?.role || 'client';
+    const allMenus = [
+      { id: 'dashboard', label: 'Tableau de bord', icon: faTachometerAlt, roles: ['admin', 'manager', 'editor', 'client'] },
+      { id: 'products', label: 'Produits', icon: faBox, roles: ['admin', 'manager', 'editor'] },
+      { id: 'gallery', label: 'Galerie', icon: faImages, roles: ['admin', 'manager', 'editor'] },
+      { id: 'donations', label: 'Dons', icon: faDonate, roles: ['admin', 'manager'] },
+      { id: 'orders', label: 'Commandes', icon: faShoppingCart, roles: ['admin', 'manager'] },
+      { id: 'users', label: 'Utilisateurs', icon: faUsers, roles: ['admin'] },
+      { id: 'messages', label: 'Messages', icon: faEnvelope, roles: ['admin', 'manager'] },
+      { id: 'testimonials', label: 'Témoignages', icon: faStar, roles: ['admin', 'manager', 'editor'] },
+      { id: 'formations', label: 'Formations', icon: faGraduationCap, roles: ['admin', 'manager', 'editor'] },
+      { id: 'settings', label: 'Paramètres', icon: faCog, roles: ['admin'] }
+    ];
+    return allMenus.filter(menu => menu.roles.includes(userRole));
+  };
 
   const fetchAllData = async () => {
     try {
@@ -143,57 +160,55 @@ useEffect(() => {
     }
   };
   
-  // Export CSV des messages
-const exportMessages = () => {
-  if (!messages.length) {
-    alert("Aucun message à exporter");
-    return;
-  }
-  
-  const headers = ["Nom", "Email", "Téléphone", "Message", "Date", "Lu"];
-  const rows = messages.map(m => [
-    `"${(m.name || '').replace(/"/g, '""')}"`,
-    `"${(m.email || '').replace(/"/g, '""')}"`,
-    `"${(m.phone || '').replace(/"/g, '""')}"`,
-    `"${(m.message || '').replace(/"/g, '""')}"`,
-    `"${new Date(m.createdAt).toLocaleString('fr-FR')}"`,
-    `"${m.read ? "Oui" : "Non"}"`
-  ]);
-  
-  const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
-  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `messages_${new Date().toISOString().split("T")[0]}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-};
-
-// Marquer tous les messages comme lus
-const markAllAsRead = async () => {
-  try {
-    const token = localStorage.getItem('adminToken');
-    const unreadMessages = messages.filter(m => !m.read);
-    
-    if (unreadMessages.length === 0) {
-      alert("Tous les messages sont déjà lus");
+  const exportMessages = () => {
+    if (!messages.length) {
+      alert("Aucun message à exporter");
       return;
     }
     
-    for (const msg of unreadMessages) {
-      await axios.put(`/api/admin/messages/${msg.id}`, { read: true }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    }
+    const headers = ["Nom", "Email", "Téléphone", "Message", "Date", "Lu"];
+    const rows = messages.map(m => [
+      `"${(m.name || '').replace(/"/g, '""')}"`,
+      `"${(m.email || '').replace(/"/g, '""')}"`,
+      `"${(m.phone || '').replace(/"/g, '""')}"`,
+      `"${(m.message || '').replace(/"/g, '""')}"`,
+      `"${new Date(m.createdAt).toLocaleString('fr-FR')}"`,
+      `"${m.read ? "Oui" : "Non"}"`
+    ]);
     
-    alert(`${unreadMessages.length} message(s) marqué(s) comme lu`);
-    fetchAllData();
-  } catch (error) {
-    console.error("Erreur:", error);
-    alert("Erreur lors de la mise à jour");
-  }
-};
+    const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `messages_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const unreadMessages = messages.filter(m => !m.read);
+      
+      if (unreadMessages.length === 0) {
+        alert("Tous les messages sont déjà lus");
+        return;
+      }
+      
+      for (const msg of unreadMessages) {
+        await axios.put(`/api/admin/messages/${msg.id}`, { read: true }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      
+      alert(`${unreadMessages.length} message(s) marqué(s) comme lu`);
+      fetchAllData();
+    } catch (error) {
+      console.error("Erreur:", error);
+      alert("Erreur lors de la mise à jour");
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -224,7 +239,7 @@ const markAllAsRead = async () => {
     try {
       const token = localStorage.getItem('adminToken');
       const headers = { Authorization: `Bearer ${token}` };
-      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : type));
+      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : (type === 'user' ? 'users' : type)));
       
       if (data.id) {
         await axios.put(`/api/admin/${apiType}/${data.id}`, data, { headers });
@@ -237,7 +252,8 @@ const markAllAsRead = async () => {
         product: { state: products, setter: setProducts },
         testimonial: { state: testimonials, setter: setTestimonials },
         formation: { state: formations, setter: setFormations },
-        category: { state: categories, setter: setCategories }
+        category: { state: categories, setter: setCategories },
+        user: { state: users, setter: setUsers },
       };
       
       const config = stateMap[type];
@@ -260,20 +276,8 @@ const markAllAsRead = async () => {
   const handleDelete = async (id, type) => {
     try {
       const token = localStorage.getItem('adminToken');
-      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : type));
+      const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : (type === 'user' ? 'users' : type)));
       await axios.delete(`/api/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
-      
-      const handleMarkAsRead = async (id) => {
-  try {
-    const token = localStorage.getItem('adminToken');
-    await axios.put(`/api/admin/messages/${id}`, { read: true }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    fetchAllData();
-  } catch (error) {
-    console.error('Erreur', error);
-  }
-};
       
       const stateMap = {
         product: { state: products, setter: setProducts },
@@ -326,10 +330,12 @@ const markAllAsRead = async () => {
           return { name: '', price: '', category: 'sac', description: '', icon: '👜', stock: 0, cloudinaryImage: '' };
         case 'testimonial':
           return { name: '', role: '', content: '', rating: 5, active: true, videoUrl: '' };
-       case 'formation':
-  return { name: '', description: '', duration: '1 mois', price: '', cloudinaryImage: '', videoUrl: '', type: 'formation' };
+        case 'formation':
+          return { name: '', description: '', duration: '1 mois', price: '', cloudinaryImage: '', videoUrl: '', type: 'formation' };
         case 'category':
           return { name: '', slug: '', icon: '📁' };
+        case 'user':
+          return { name: '', email: '', phone: '', role: 'client', status: 'active', password: '' };
         default:
           return {};
       }
@@ -349,6 +355,32 @@ const markAllAsRead = async () => {
               <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
             </>
           );
+        
+        case 'user':
+          return (
+            <>
+              <div><label className="block mb-1 font-medium">Nom complet</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Email</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Téléphone</label><input type="tel" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Type de compte</label>
+                <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                  <option value="client">👤 Client</option>
+                  <option value="etudiant">🎓 Étudiant</option>
+                  <option value="artisan">🪡 Artisan</option>
+                  <option value="editor">✏️ Éditeur</option>
+                  <option value="manager">📊 Gestionnaire</option>
+                  <option value="admin">👑 Administrateur</option>
+                </select>
+              </div>
+              <div><label className="block mb-1 font-medium">Statut</label>
+                <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                  <option value="active">✅ Actif</option>
+                  <option value="inactive">❌ Inactif</option>
+                </select>
+              </div>
+              <div><label className="block mb-1 font-medium">Mot de passe</label><input type="password" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="Laisser vide pour générer automatiquement" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} /></div>
+            </>
+          );
         case 'testimonial':
           return (
             <>
@@ -360,32 +392,32 @@ const markAllAsRead = async () => {
               <div><label className="flex items-center gap-2"><input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} /> Activer sur le site</label></div>
             </>
           );
-       case 'formation':
-  return (
-    <>
-      <div><label className="block mb-1 font-medium">Type</label>
-        <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.type || 'formation'} onChange={e => setFormData({...formData, type: e.target.value})}>
-          <option value="formation">🎓 Formation</option>
-          <option value="evenement">📅 Événement</option>
-        </select>
-      </div>
-      <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-      <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-      {formData.type === 'formation' ? (
-        <>
-          <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
-          <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
-        </>
-      ) : (
-        <>
-          <div><label className="block mb-1 font-medium">Date de l'événement</label><input type="date" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} /></div>
-          <div><label className="block mb-1 font-medium">Lieu</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="Lieu de l'événement" value={formData.location || ''} onChange={e => setFormData({...formData, location: e.target.value})} /></div>
-        </>
-      )}
-      <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
-      <div><label className="block mb-1 font-medium">Lien vidéo (YouTube)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
-    </>
-  );
+        case 'formation':
+          return (
+            <>
+              <div><label className="block mb-1 font-medium">Type</label>
+                <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.type || 'formation'} onChange={e => setFormData({...formData, type: e.target.value})}>
+                  <option value="formation">🎓 Formation</option>
+                  <option value="evenement">📅 Événement</option>
+                </select>
+              </div>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+              {formData.type === 'formation' ? (
+                <>
+                  <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
+                  <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
+                </>
+              ) : (
+                <>
+                  <div><label className="block mb-1 font-medium">Date de l'événement</label><input type="date" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} /></div>
+                  <div><label className="block mb-1 font-medium">Lieu</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="Lieu de l'événement" value={formData.location || ''} onChange={e => setFormData({...formData, location: e.target.value})} /></div>
+                </>
+              )}
+              <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Lien vidéo (YouTube)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
+            </>
+          );
         default:
           return null;
       }
@@ -395,7 +427,7 @@ const markAllAsRead = async () => {
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">{item ? '✏️ Modifier' : '➕ Ajouter'} {type === 'product' ? 'un produit' : type === 'testimonial' ? 'un témoignage' : type === 'formation' ? 'une formation' : 'une catégorie'}</h2>
+            <h2 className="text-xl font-bold">{item ? '✏️ Modifier' : '➕ Ajouter'} {type === 'product' ? 'un produit' : type === 'testimonial' ? 'un témoignage' : type === 'formation' ? 'une formation' : type === 'user' ? 'un utilisateur' : 'une catégorie'}</h2>
             <button onClick={onClose} className="text-gray-500 hover:text-gray-700"><FontAwesomeIcon icon={faTimes} size="lg" /></button>
           </div>
           <div className="space-y-3">
@@ -454,18 +486,7 @@ const markAllAsRead = async () => {
 
         <div className="bg-white dark:bg-gray-800 shadow-md overflow-x-auto sticky top-[72px] z-30">
           <div className="px-6 flex gap-1">
-            {[
-              { id: 'dashboard', label: 'Tableau de bord', icon: faTachometerAlt },
-              { id: 'products', label: 'Produits', icon: faBox, count: stats.totalProducts },
-              { id: 'gallery', label: 'Galerie', icon: faImages },
-              { id: 'donations', label: 'Dons', icon: faDonate },
-              { id: 'orders', label: 'Commandes', icon: faShoppingCart, count: stats.totalOrders },
-              { id: 'users', label: 'Utilisateurs', icon: faUsers, count: stats.totalUsers },
-              { id: 'messages', label: 'Messages', icon: faEnvelope, count: stats.totalMessages },
-              { id: 'testimonials', label: 'Témoignages', icon: faStar },
-              { id: 'formations', label: 'Formations', icon: faGraduationCap },
-              { id: 'settings', label: 'Paramètres', icon: faCog }
-            ].map(tab => (
+            {getUserMenus().map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -518,49 +539,78 @@ const markAllAsRead = async () => {
 
           {activeTab === 'users' && (
             <div>
-              <h2 className="text-xl font-bold mb-4">Gestion des utilisateurs</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Utilisateurs</h2>
+                <button onClick={() => { setSelectedItem(null); setModalType('user'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded">
+                  + Ajouter un utilisateur
+                </button>
+              </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
-                <table className="w-full"><thead className="bg-gray-50 dark:bg-gray-700"><tr><th className="p-3 text-left">Nom</th><th className="p-3 text-left">Email</th><th className="p-3 text-left">Rôle</th><th className="p-3 text-center">Actions</th></tr></thead><tbody>{users.map(u => (<tr key={u.id} className="border-t"><td className="p-3">{u.name}</td><td className="p-3">{u.email}</td><td className="p-3"><span className={`px-2 py-1 text-xs rounded ${u.role === 'admin' ? 'bg-afi-green text-white' : 'bg-gray-200'}`}>{u.role || 'client'}</span></td><td className="p-3 text-center"><button onClick={() => setShowConfirmDelete({ id: u.id, type: 'user' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button></td></tr>))}</tbody></table>
+                <table className="w-full">
+                  <thead className="bg-gray-50 dark:bg-gray-700">
+                    <tr className="text-gray-700 dark:text-gray-300">
+                      <th className="p-3 text-left">Nom</th>
+                      <th className="p-3 text-left">Email</th>
+                      <th className="p-3 text-left">Rôle</th>
+                      <th className="p-3 text-left">Statut</th>
+                      <th className="p-3 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(u => (
+                      <tr key={u.id} className="border-t">
+                        <td className="p-3">{u.name}</td>
+                        <td className="p-3">{u.email}</td>
+                        <td className="p-3">{u.role || 'client'}</td>
+                        <td className="p-3">{u.status === 'active' ? 'Actif' : 'Inactif'}</td>
+                        <td className="p-3 text-center">
+                          <button onClick={() => { setSelectedItem(u); setModalType('user'); setShowModal(true); }} className="text-blue-500 mr-2">✏️</button>
+                          <button onClick={() => setShowConfirmDelete({ id: u.id, type: 'user' })} className="text-red-500">🗑️</button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
 
-        {activeTab === 'messages' && (
-  <div>
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-bold">✉️ Messages</h2>
-     <div className="flex gap-2">
-  <button onClick={exportMessages} className="bg-afi-green text-white px-4 py-2 rounded text-sm">📥 Exporter CSV</button>
-  <button onClick={markAllAsRead} className="border border-afi-green text-afi-green px-4 py-2 rounded text-sm">✓ Marquer tout lu</button>
-</div>
-    </div>
-    <div className="space-y-4" id="messagesList">
-      {messages.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
-          <p className="text-gray-500">Aucun message</p>
-        </div>
-      ) : (
-        messages.map(msg => (
-          <div key={msg.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 ${!msg.read ? 'border-l-4 border-afi-green' : ''}`}>
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <p className="font-semibold">{msg.name} - {msg.email}</p>
-                <p className="text-sm text-gray-500">{msg.phone}</p>
-                <p className="mt-2">{msg.message}</p>
-                <p className="text-xs text-gray-400 mt-2">{new Date(msg.createdAt).toLocaleString()}</p>
+          {activeTab === 'messages' && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">✉️ Messages</h2>
+                <div className="flex gap-2">
+                  <button onClick={exportMessages} className="bg-afi-green text-white px-4 py-2 rounded text-sm">📥 Exporter CSV</button>
+                  <button onClick={markAllAsRead} className="border border-afi-green text-afi-green px-4 py-2 rounded text-sm">✓ Marquer tout lu</button>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <a href={`https://wa.me/${msg.phone?.replace(/\D/g, '')}`} target="_blank" className="text-green-500 text-sm">💬</a>
-                <a href={`mailto:${msg.email}`} className="text-blue-500 text-sm">✉️</a>
-                <button onClick={() => setShowConfirmDelete({ id: msg.id, type: 'message' })} className="text-red-500 text-sm">🗑️</button>
+              <div className="space-y-4" id="messagesList">
+                {messages.length === 0 ? (
+                  <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
+                    <p className="text-gray-500">Aucun message</p>
+                  </div>
+                ) : (
+                  messages.map(msg => (
+                    <div key={msg.id} className={`bg-white dark:bg-gray-800 rounded-lg shadow p-4 ${!msg.read ? 'border-l-4 border-afi-green' : ''}`}>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <p className="font-semibold">{msg.name} - {msg.email}</p>
+                          <p className="text-sm text-gray-500">{msg.phone}</p>
+                          <p className="mt-2">{msg.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">{new Date(msg.createdAt).toLocaleString()}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <a href={`https://wa.me/${msg.phone?.replace(/\D/g, '')}`} target="_blank" className="text-green-500 text-sm">💬</a>
+                          <a href={`mailto:${msg.email}`} className="text-blue-500 text-sm">✉️</a>
+                          <button onClick={() => setShowConfirmDelete({ id: msg.id, type: 'message' })} className="text-red-500 text-sm">🗑️</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
-          </div>
-        ))
-      )}
-    </div>
-  </div>
-)}
+          )}
 
           {activeTab === 'testimonials' && (
             <div>
@@ -578,40 +628,40 @@ const markAllAsRead = async () => {
           )}
 
           {activeTab === 'formations' && (
-  <div>
-    <div className="flex justify-between items-center mb-4">
-      <h2 className="text-xl font-bold">Gestion des formations et événements</h2>
-      <button onClick={() => { setSelectedItem(null); setModalType('formation'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {formations.map(f => (
-        <div key={f.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-          <div className="flex justify-between">
             <div>
-              <span className={`text-xs px-2 py-1 rounded ${f.type === 'formation' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
-                {f.type === 'formation' ? '🎓 Formation' : '📅 Événement'}
-              </span>
-              <h3 className="font-bold text-lg mt-1">{f.name}</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold">Gestion des formations et événements</h2>
+                <button onClick={() => { setSelectedItem(null); setModalType('formation'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {formations.map(f => (
+                  <div key={f.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+                    <div className="flex justify-between">
+                      <div>
+                        <span className={`text-xs px-2 py-1 rounded ${f.type === 'formation' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'}`}>
+                          {f.type === 'formation' ? '🎓 Formation' : '📅 Événement'}
+                        </span>
+                        <h3 className="font-bold text-lg mt-1">{f.name}</h3>
+                      </div>
+                      <button onClick={() => setShowConfirmDelete({ id: f.id, type: 'formation' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button>
+                    </div>
+                    <p className="text-gray-600 text-sm mt-1">{f.description}</p>
+                    {f.cloudinaryImage && <img src={f.cloudinaryImage} alt={f.name} className="w-full h-32 object-cover rounded mt-2" />}
+                    <div className="mt-2 flex justify-between text-sm">
+                      {f.type === 'formation' ? (
+                        <><span>Durée: {f.duration}</span><span className="font-bold text-afi-green">{f.price} FCFA</span></>
+                      ) : (
+                        <><span>📅 {f.date}</span><span>📍 {f.location}</span></>
+                      )}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <button onClick={() => { setSelectedItem(f); setModalType('formation'); setShowModal(true); }} className="text-blue-500 text-sm">Modifier</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <button onClick={() => setShowConfirmDelete({ id: f.id, type: 'formation' })} className="text-red-500"><FontAwesomeIcon icon={faTrash} /></button>
-          </div>
-          <p className="text-gray-600 text-sm mt-1">{f.description}</p>
-          {f.cloudinaryImage && <img src={f.cloudinaryImage} alt={f.name} className="w-full h-32 object-cover rounded mt-2" />}
-          <div className="mt-2 flex justify-between text-sm">
-            {f.type === 'formation' ? (
-              <><span>Durée: {f.duration}</span><span className="font-bold text-afi-green">{f.price} FCFA</span></>
-            ) : (
-              <><span>📅 {f.date}</span><span>📍 {f.location}</span></>
-            )}
-          </div>
-          <div className="flex gap-2 mt-2">
-            <button onClick={() => { setSelectedItem(f); setModalType('formation'); setShowModal(true); }} className="text-blue-500 text-sm">Modifier</button>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
+          )}
 
           {activeTab === 'settings' && (
             <div className="max-w-4xl mx-auto">
