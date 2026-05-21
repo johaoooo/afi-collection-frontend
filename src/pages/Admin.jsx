@@ -143,11 +143,25 @@ useEffect(() => {
     }
   };
   
-  const exportMessages = () => {
-  const headers = ["Nom","Email","Telephone","Message","Date","Lu"];
-  const rows = messages.map(m => [m.name,m.email,m.phone,m.message,new Date(m.createdAt).toLocaleString(),m.read?"Oui":"Non"]);
-  const csv = [headers,...rows].map(r=>r.join(",")).join("\n");
-  const blob = new Blob([csv],{type:"text/csv"});
+  // Export CSV des messages
+const exportMessages = () => {
+  if (!messages.length) {
+    alert("Aucun message à exporter");
+    return;
+  }
+  
+  const headers = ["Nom", "Email", "Téléphone", "Message", "Date", "Lu"];
+  const rows = messages.map(m => [
+    `"${(m.name || '').replace(/"/g, '""')}"`,
+    `"${(m.email || '').replace(/"/g, '""')}"`,
+    `"${(m.phone || '').replace(/"/g, '""')}"`,
+    `"${(m.message || '').replace(/"/g, '""')}"`,
+    `"${new Date(m.createdAt).toLocaleString('fr-FR')}"`,
+    `"${m.read ? "Oui" : "Non"}"`
+  ]);
+  
+  const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -156,16 +170,29 @@ useEffect(() => {
   URL.revokeObjectURL(url);
 };
 
+// Marquer tous les messages comme lus
 const markAllAsRead = async () => {
-  const token = localStorage.getItem('adminToken');
-  for (const msg of messages) {
-    if (!msg.read) {
+  try {
+    const token = localStorage.getItem('adminToken');
+    const unreadMessages = messages.filter(m => !m.read);
+    
+    if (unreadMessages.length === 0) {
+      alert("Tous les messages sont déjà lus");
+      return;
+    }
+    
+    for (const msg of unreadMessages) {
       await axios.put(`/api/admin/messages/${msg.id}`, { read: true }, {
         headers: { Authorization: `Bearer ${token}` }
       });
     }
+    
+    alert(`${unreadMessages.length} message(s) marqué(s) comme lu`);
+    fetchAllData();
+  } catch (error) {
+    console.error("Erreur:", error);
+    alert("Erreur lors de la mise à jour");
   }
-  fetchAllData();
 };
 
   const handleLogin = async (e) => {
@@ -502,10 +529,10 @@ const markAllAsRead = async () => {
   <div>
     <div className="flex justify-between items-center mb-4">
       <h2 className="text-xl font-bold">✉️ Messages</h2>
-      <div className="flex gap-2">
-        <button id="exportMessagesBtn" className="bg-afi-green text-white px-4 py-2 rounded text-sm">📥 Exporter CSV</button>
-        <button id="markAllReadBtn" className="border border-afi-green text-afi-green px-4 py-2 rounded text-sm">✓ Marquer tout lu</button>
-      </div>
+     <div className="flex gap-2">
+  <button onClick={exportMessages} className="bg-afi-green text-white px-4 py-2 rounded text-sm">📥 Exporter CSV</button>
+  <button onClick={markAllAsRead} className="border border-afi-green text-afi-green px-4 py-2 rounded text-sm">✓ Marquer tout lu</button>
+</div>
     </div>
     <div className="space-y-4" id="messagesList">
       {messages.length === 0 ? (
