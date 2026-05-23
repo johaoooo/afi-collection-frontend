@@ -4,6 +4,7 @@ import RoleRequestsAdmin from "../components/RoleRequestsAdmin";
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
+import API_URL from '../config/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faTachometerAlt, faBox, faShoppingCart, faUsers, faEnvelope, 
@@ -125,14 +126,14 @@ function Admin() {
       const headers = { Authorization: `Bearer ${token}` };
       
       const [productsRes, ordersRes, usersRes, messagesRes, testimonialsRes, formationsRes, categoriesRes, settingsRes] = await Promise.all([
-        axios.get('/api/admin/products', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/orders', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/users', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/messages', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/testimonials', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/formations', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/categories', { headers }).catch(() => ({ data: [] })),
-        axios.get('/api/admin/settings', { headers }).catch(() => ({ data: {} }))
+        axios.get(`${API_URL}/admin/products`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/orders`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/users`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/messages`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/testimonials`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/formations`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/categories`, { headers }).catch(() => ({ data: [] })),
+        axios.get(`${API_URL}/admin/settings`, { headers }).catch(() => ({ data: {} }))
       ]);
       
       setProducts(productsRes.data || []);
@@ -196,7 +197,7 @@ function Admin() {
         return;
       }
       for (const msg of unreadMessages) {
-        await axios.put(`/api/admin/messages/${msg.id}`, { read: true }, {
+        await axios.put(`${API_URL}/admin/messages/${msg.id}`, { read: true }, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
@@ -214,7 +215,7 @@ function Admin() {
     const email = formData.get('email');
     const password = formData.get('password');
     try {
-      const response = await axios.post('/api/admin/login', { email, password });
+      const response = await axios.post(`${API_URL}/admin/login`, { email, password });
       localStorage.setItem('adminToken', response.data.token);
       localStorage.setItem('adminUser', JSON.stringify(response.data.user || { name: 'Admin', email: email, role: 'admin' }));
       setIsLoggedIn(true);
@@ -239,9 +240,9 @@ function Admin() {
       const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : (type === 'user' ? 'users' : type)));
       
       if (data.id) {
-        await axios.put(`/api/admin/${apiType}/${data.id}`, data, { headers });
+        await axios.put(`${API_URL}/admin/${apiType}/${data.id}`, data, { headers });
       } else {
-        const response = await axios.post(`/api/admin/${apiType}`, data, { headers });
+        const response = await axios.post(`${API_URL}/admin/${apiType}`, data, { headers });
         data = response.data;
       }
       
@@ -274,7 +275,7 @@ function Admin() {
     try {
       const token = localStorage.getItem('adminToken');
       const apiType = type === 'testimonial' ? 'testimonials' : (type === 'product' ? 'products' : (type === 'formation' ? 'formations' : (type === 'user' ? 'users' : type)));
-      await axios.delete(`/api/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${API_URL}/admin/${apiType}/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       
       const stateMap = {
         product: { state: products, setter: setProducts },
@@ -300,7 +301,7 @@ function Admin() {
   const handleUpdateOrderStatus = async (id, status) => {
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.put(`/api/admin/orders/${id}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${API_URL}/admin/orders/${id}`, { status }, { headers: { Authorization: `Bearer ${token}` } });
       setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
       fetchAllData();
     } catch (error) {
@@ -311,7 +312,7 @@ function Admin() {
   const handleSaveSettings = async () => {
     try {
       const token = localStorage.getItem('adminToken');
-      await axios.put('/api/admin/settings', settings, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${API_URL}/admin/settings`, settings, { headers: { Authorization: `Bearer ${token}` } });
       alert('Paramètres enregistrés avec succès !');
     } catch (error) {
       alert('Erreur lors de l\'enregistrement');
