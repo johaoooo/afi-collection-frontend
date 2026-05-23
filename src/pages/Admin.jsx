@@ -344,23 +344,23 @@ function Admin() {
         case 'product':
           return (
             <>
-              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Catégorie</label><select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}><option value="sac">Sac</option><option value="chaussure">Chaussure</option><option value="pagne">Pagne</option><option value="accessoire">Accessoire</option></select></div>
-              <div><label className="block mb-1 font-medium">Icône</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Stock</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Catégorie</label><select className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}><option value="sac">Sac</option><option value="chaussure">Chaussure</option><option value="pagne">Pagne</option><option value="accessoire">Accessoire</option></select></div>
+              <div><label className="block mb-1 font-medium">Icône</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Stock</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
             </>
           );
         case 'user':
           return (
             <>
-              <div><label className="block mb-1 font-medium">Nom complet</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Email</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Téléphone</label><input type="tel" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Nom complet</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Email</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Téléphone</label><input type="tel" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} /></div>
               <div><label className="block mb-1 font-medium">Type de compte</label>
-                <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
+                <select className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}>
                   <option value="client">👤 Client</option>
                   <option value="etudiant">🎓 Étudiant</option>
                   <option value="artisan">🪡 Artisan</option>
@@ -370,22 +370,22 @@ function Admin() {
                 </select>
               </div>
               <div><label className="block mb-1 font-medium">Statut</label>
-                <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
+                <select className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
                   <option value="active">✅ Actif</option>
                   <option value="inactive">❌ Inactif</option>
                 </select>
               </div>
-              <div><label className="block mb-1 font-medium">Mot de passe</label><input type="password" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="Laisser vide pour générer automatiquement" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Mot de passe</label><input type="password" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="Laisser vide pour générer automatiquement" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} /></div>
             </>
           );
         case 'testimonial':
           return (
             <>
-              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Rôle</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Témoignage</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="4" value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Lien vidéo (YouTube ou Cloudinary)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Note</label><select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.rating} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})}><option value="5">5⭐</option><option value="4">4⭐</option><option value="3">3⭐</option><option value="2">2⭐</option><option value="1">1⭐</option></select></div>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Rôle</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Témoignage</label><textarea className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" rows="4" value={formData.content} onChange={e => setFormData({...formData, content: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Lien vidéo (YouTube ou Cloudinary)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Note</label><select className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.rating} onChange={e => setFormData({...formData, rating: parseInt(e.target.value)})}><option value="5">5⭐</option><option value="4">4⭐</option><option value="3">3⭐</option><option value="2">2⭐</option><option value="1">1⭐</option></select></div>
               <div><label className="flex items-center gap-2"><input type="checkbox" checked={formData.active} onChange={e => setFormData({...formData, active: e.target.checked})} /> Activer sur le site</label></div>
             </>
           );
@@ -393,26 +393,26 @@ function Admin() {
           return (
             <>
               <div><label className="block mb-1 font-medium">Type</label>
-                <select className="w-full p-2 border rounded dark:bg-gray-700" value={formData.type || 'formation'} onChange={e => setFormData({...formData, type: e.target.value})}>
+                <select className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.type || 'formation'} onChange={e => setFormData({...formData, type: e.target.value})}>
                   <option value="formation">🎓 Formation</option>
                   <option value="evenement">📅 Événement</option>
                 </select>
               </div>
-              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
-              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Nom</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required /></div>
+              <div><label className="block mb-1 font-medium">Description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
               {formData.type === 'formation' ? (
                 <>
-                  <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
-                  <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
+                  <div><label className="block mb-1 font-medium">Durée</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} /></div>
+                  <div><label className="block mb-1 font-medium">Prix (FCFA)</label><input type="number" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} /></div>
                 </>
               ) : (
                 <>
-                  <div><label className="block mb-1 font-medium">Date de l'événement</label><input type="date" className="w-full p-2 border rounded dark:bg-gray-700" value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} /></div>
-                  <div><label className="block mb-1 font-medium">Lieu</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="Lieu de l'événement" value={formData.location || ''} onChange={e => setFormData({...formData, location: e.target.value})} /></div>
+                  <div><label className="block mb-1 font-medium">Date de l'événement</label><input type="date" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={formData.date || ''} onChange={e => setFormData({...formData, date: e.target.value})} /></div>
+                  <div><label className="block mb-1 font-medium">Lieu</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="Lieu de l'événement" value={formData.location || ''} onChange={e => setFormData({...formData, location: e.target.value})} /></div>
                 </>
               )}
-              <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
-              <div><label className="block mb-1 font-medium">Lien vidéo (YouTube)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
+              <div><label className="block mb-1 font-medium">Lien vidéo (YouTube)</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" placeholder="https://www.youtube.com/embed/..." value={formData.videoUrl || ""} onChange={e => setFormData({...formData, videoUrl: e.target.value})} /></div>
             </>
           );
         default:
@@ -448,8 +448,8 @@ function Admin() {
             <p className="text-gray-500 dark:text-gray-400 mt-1">Espace Administration</p>
           </div>
           <form onSubmit={handleLogin}>
-            <div className="mb-4"><label className="block mb-2">Email</label><input type="email" name="email" className="w-full p-3 border rounded bg-white dark:bg-gray-700" required /></div>
-            <div className="mb-4"><label className="block mb-2">Mot de passe</label><input type="password" name="password" className="w-full p-3 border rounded bg-white dark:bg-gray-700" required /></div>
+            <div className="mb-4"><label className="block mb-2">Email</label><input type="email" name="email" className="w-full p-3 border rounded bg-white dark:bg-gray-700 dark:border-gray-600" required /></div>
+            <div className="mb-4"><label className="block mb-2">Mot de passe</label><input type="password" name="password" className="w-full p-3 border rounded bg-white dark:bg-gray-700 dark:border-gray-600" required /></div>
             <button type="submit" className="w-full bg-afi-green text-white p-3 rounded font-semibold">Se connecter</button>
           </form>
           <div className="text-center text-xs text-gray-400 mt-4">admin@afi-collection.com / admin123</div>
@@ -654,6 +654,9 @@ function Admin() {
           {/* ✅ NOUVEAU : Onglet Demandes de rôle */}
           {activeTab === 'role-requests' && <RoleRequestsAdmin />}
 
+          {activeTab === 'gallery' && <GalerieAdmin />}
+          {activeTab === 'donations' && <DonAdmin />}
+
           {activeTab === 'settings' && (
             <div className="max-w-4xl mx-auto">
               <h2 className="text-2xl font-bold mb-6 flex items-center gap-2"><FontAwesomeIcon icon={faCog} /> Paramètres du site</h2>
@@ -661,36 +664,36 @@ function Admin() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faGlobe} /> Informations générales</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className="block mb-1 text-sm font-medium">Nom du site</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Description</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.siteDescription} onChange={e => setSettings({...settings, siteDescription: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Email de contact</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactEmail} onChange={e => setSettings({...settings, contactEmail: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Téléphone</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactPhone} onChange={e => setSettings({...settings, contactPhone: e.target.value})} /></div>
-                    <div className="md:col-span-2"><label className="block mb-1 text-sm font-medium">Adresse</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700" value={settings.contactAddress} onChange={e => setSettings({...settings, contactAddress: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Nom du site</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.siteName} onChange={e => setSettings({...settings, siteName: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Description</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.siteDescription} onChange={e => setSettings({...settings, siteDescription: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Email de contact</label><input type="email" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.contactEmail} onChange={e => setSettings({...settings, contactEmail: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Téléphone</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.contactPhone} onChange={e => setSettings({...settings, contactPhone: e.target.value})} /></div>
+                    <div className="md:col-span-2"><label className="block mb-1 text-sm font-medium">Adresse</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.contactAddress} onChange={e => setSettings({...settings, contactAddress: e.target.value})} /></div>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faPalette} /> Apparence</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className="block mb-1 text-sm font-medium">Couleur principale</label><input type="color" className="w-full h-10 border rounded" value={settings.primaryColor} onChange={e => setSettings({...settings, primaryColor: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Couleur secondaire</label><input type="color" className="w-full h-10 border rounded" value={settings.secondaryColor} onChange={e => setSettings({...settings, secondaryColor: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Police</label><select className="w-full p-2 border rounded" value={settings.fontFamily} onChange={e => setSettings({...settings, fontFamily: e.target.value})}><option>Cormorant Garamond</option><option>Poppins</option><option>Roboto</option><option>Open Sans</option></select></div>
+                    <div><label className="block mb-1 text-sm font-medium">Couleur principale</label><input type="color" className="w-full h-10 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.primaryColor} onChange={e => setSettings({...settings, primaryColor: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Couleur secondaire</label><input type="color" className="w-full h-10 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.secondaryColor} onChange={e => setSettings({...settings, secondaryColor: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Police</label><select className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.fontFamily} onChange={e => setSettings({...settings, fontFamily: e.target.value})}><option>Cormorant Garamond</option><option>Poppins</option><option>Roboto</option><option>Open Sans</option></select></div>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faShareAlt} /> Réseaux sociaux</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faFacebook} className="mr-1" /> Facebook</label><input type="url" className="w-full p-2 border rounded" value={settings.facebook} onChange={e => setSettings({...settings, facebook: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faInstagram} className="mr-1" /> Instagram</label><input type="url" className="w-full p-2 border rounded" value={settings.instagram} onChange={e => setSettings({...settings, instagram: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faTwitter} className="mr-1" /> Twitter</label><input type="url" className="w-full p-2 border rounded" value={settings.twitter} onChange={e => setSettings({...settings, twitter: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faWhatsapp} className="mr-1" /> WhatsApp</label><input type="text" className="w-full p-2 border rounded" value={settings.whatsapp} onChange={e => setSettings({...settings, whatsapp: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faFacebook} className="mr-1" /> Facebook</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.facebook} onChange={e => setSettings({...settings, facebook: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faInstagram} className="mr-1" /> Instagram</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.instagram} onChange={e => setSettings({...settings, instagram: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faTwitter} className="mr-1" /> Twitter</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.twitter} onChange={e => setSettings({...settings, twitter: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium"><FontAwesomeIcon icon={faWhatsapp} className="mr-1" /> WhatsApp</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.whatsapp} onChange={e => setSettings({...settings, whatsapp: e.target.value})} /></div>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faGlobe} /> SEO</h3>
                   <div className="space-y-3">
-                    <div><label className="block mb-1 text-sm font-medium">Meta titre</label><input type="text" className="w-full p-2 border rounded" value={settings.metaTitle} onChange={e => setSettings({...settings, metaTitle: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Meta description</label><textarea className="w-full p-2 border rounded" rows="2" value={settings.metaDescription} onChange={e => setSettings({...settings, metaDescription: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Mots-clés</label><input type="text" className="w-full p-2 border rounded" value={settings.metaKeywords} onChange={e => setSettings({...settings, metaKeywords: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Meta titre</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.metaTitle} onChange={e => setSettings({...settings, metaTitle: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Meta description</label><textarea className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" rows="2" value={settings.metaDescription} onChange={e => setSettings({...settings, metaDescription: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Mots-clés</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.metaKeywords} onChange={e => setSettings({...settings, metaKeywords: e.target.value})} /></div>
                   </div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -704,8 +707,8 @@ function Admin() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2"><FontAwesomeIcon icon={faClock} /> Horaires</h3>
                   <div className="space-y-3">
-                    <div><label className="block mb-1 text-sm font-medium">Horaires d'ouverture</label><input type="text" className="w-full p-2 border rounded" value={settings.openingHours} onChange={e => setSettings({...settings, openingHours: e.target.value})} /></div>
-                    <div><label className="block mb-1 text-sm font-medium">Jours de fermeture</label><input type="text" className="w-full p-2 border rounded" value={settings.closingDays} onChange={e => setSettings({...settings, closingDays: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Horaires d'ouverture</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.openingHours} onChange={e => setSettings({...settings, openingHours: e.target.value})} /></div>
+                    <div><label className="block mb-1 text-sm font-medium">Jours de fermeture</label><input type="text" className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600" value={settings.closingDays} onChange={e => setSettings({...settings, closingDays: e.target.value})} /></div>
                   </div>
                 </div>
                 <div className="flex justify-end">
@@ -716,9 +719,6 @@ function Admin() {
           )}
         </div>
       </div>
-
-      {activeTab === "donations" && <DonAdmin />}
-      {activeTab === "gallery" && <GalerieAdmin />}
 
       {showModal && <FormModal type={modalType} item={selectedItem} onClose={() => { setShowModal(false); setSelectedItem(null); }} onSave={(data) => handleSave(data, modalType)} />}
       
