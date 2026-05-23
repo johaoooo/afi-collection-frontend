@@ -25,7 +25,7 @@ import afiImage from '../assets/afi.jpeg';
 import afi2Image from '../assets/afi2.jpeg';
 import afi7Image from '../assets/afi7.jpeg';
 
-const API_URL = 'http://localhost:5000/api';
+import API_URL from "../config/api";
 
 function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);

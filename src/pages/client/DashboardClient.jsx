@@ -6,11 +6,10 @@ import {
   faCamera, faShoppingBag, faHeart, faMapMarkerAlt, faClock,
   faCheckCircle, faTruck, faUserCircle,
   faUpload, faImage, faSpinner, faTrashAlt,
-  faBox, faSignOutAlt
+  faBox, faSignOutAlt, faBriefcase, faGraduationCap
 } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
-
-const API_URL = 'http://localhost:5000/api';
+import API_URL from "../../config/api";
 
 function DashboardClient() {
   const [profile, setProfile] = useState(null);
@@ -19,6 +18,8 @@ function DashboardClient() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [roleRequestMessage, setRoleRequestMessage] = useState('');
   const [editForm, setEditForm] = useState({
     name: '',
     email: '',
@@ -128,6 +129,22 @@ function DashboardClient() {
     }
   };
 
+  const demanderRole = async (role) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(`${API_URL}/profile/role-request`, 
+        { requestedRole: role },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setRoleRequestMessage(`Votre demande pour devenir ${role === 'artisan' ? 'Artisan' : 'Étudiant'} a bien été envoyée à l'administrateur.`);
+      setShowRoleModal(true);
+      setTimeout(() => setShowRoleModal(false), 4000);
+      showMessage(`Demande envoyée pour devenir ${role === 'artisan' ? 'Artisan' : 'Étudiant'}`, 'success');
+    } catch (error) {
+      showMessage('Erreur lors de la demande', 'error');
+    }
+  };
+
   const getStatusBadge = (status) => {
     const badges = {
       pending: { icon: faClock, text: 'En attente', class: 'bg-yellow-100 text-yellow-800' },
@@ -170,6 +187,18 @@ function DashboardClient() {
               message.type === 'error' ? 'bg-red-500 text-white' : 'bg-afi-green text-white'
             } animate-slide-in`}>
               {message.text}
+            </div>
+          )}
+
+          {/* Modal de confirmation demande de rôle */}
+          {showRoleModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md text-center">
+                <div className="text-4xl mb-3">📨</div>
+                <h3 className="text-lg font-semibold mb-2">Demande envoyée !</h3>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">{roleRequestMessage}</p>
+                <button onClick={() => setShowRoleModal(false)} className="mt-4 bg-afi-green text-white px-4 py-2 rounded-lg">Fermer</button>
+              </div>
             </div>
           )}
 
@@ -234,6 +263,35 @@ function DashboardClient() {
                   >
                     <FontAwesomeIcon icon={faEdit} /> Modifier mes informations
                   </button>
+
+                  {/* Demande de changement de rôle */}
+                  {profile?.role === 'client' && (
+                    <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-sm text-gray-500 mb-3">Évoluez avec AFI Collection :</p>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => demanderRole('artisan')} 
+                          className="flex-1 bg-afi-green/10 text-afi-green py-2 rounded-lg text-sm hover:bg-afi-green/20 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <FontAwesomeIcon icon={faBriefcase} className="text-sm" /> Devenir Artisan
+                        </button>
+                        <button 
+                          onClick={() => demanderRole('etudiant')} 
+                          className="flex-1 bg-afi-yellow/10 text-afi-yellow py-2 rounded-lg text-sm hover:bg-afi-yellow/20 transition-colors flex items-center justify-center gap-1"
+                        >
+                          <FontAwesomeIcon icon={faGraduationCap} className="text-sm" /> Devenir Étudiant
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile?.role !== 'client' && profile?.role !== 'admin' && (
+                    <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                      <p className="text-sm text-green-600 dark:text-green-400">
+                        ✅ Rôle actuel : {profile?.role === 'artisan' ? 'Artisan' : profile?.role === 'etudiant' ? 'Étudiant' : profile?.role}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Formulaire d'édition */}

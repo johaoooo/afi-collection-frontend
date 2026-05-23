@@ -1,5 +1,6 @@
 import DonAdmin from "../components/DonAdmin";
 import GalerieAdmin from "../components/GalerieAdmin";
+import RoleRequestsAdmin from "../components/RoleRequestsAdmin";
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import axios from 'axios';
@@ -8,7 +9,8 @@ import {
   faTachometerAlt, faBox, faShoppingCart, faUsers, faEnvelope, 
   faStar, faGraduationCap, faCog, faPlus, faEdit, faTrash, 
   faSave, faTimes, faMoneyBillWave, faGlobe, faClock,
-  faPalette, faShareAlt, faSlidersH, faImages, faDonate
+  faPalette, faShareAlt, faSlidersH, faImages, faDonate,
+  faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faInstagram, faWhatsapp, faTwitter } from '@fortawesome/free-brands-svg-icons';
 
@@ -98,7 +100,7 @@ function Admin() {
     if (markBtn) markBtn.onclick = markAllAsRead;
   }, [messages]);
 
-  // Filtrer les menus selon le rôle de l'utilisateur
+  // ✅ CORRIGÉ : ajout de l'onglet Demandes de rôle
   const getUserMenus = () => {
     const userRole = user?.role || 'client';
     const allMenus = [
@@ -111,6 +113,7 @@ function Admin() {
       { id: 'messages', label: 'Messages', icon: faEnvelope, roles: ['admin', 'manager'] },
       { id: 'testimonials', label: 'Témoignages', icon: faStar, roles: ['admin', 'manager', 'editor'] },
       { id: 'formations', label: 'Formations', icon: faGraduationCap, roles: ['admin', 'manager', 'editor'] },
+      { id: 'role-requests', label: 'Demandes de rôle', icon: faUserCheck, roles: ['admin'] }, // ✅ NOUVEAU
       { id: 'settings', label: 'Paramètres', icon: faCog, roles: ['admin'] }
     ];
     return allMenus.filter(menu => menu.roles.includes(userRole));
@@ -165,7 +168,6 @@ function Admin() {
       alert("Aucun message à exporter");
       return;
     }
-    
     const headers = ["Nom", "Email", "Téléphone", "Message", "Date", "Lu"];
     const rows = messages.map(m => [
       `"${(m.name || '').replace(/"/g, '""')}"`,
@@ -175,7 +177,6 @@ function Admin() {
       `"${new Date(m.createdAt).toLocaleString('fr-FR')}"`,
       `"${m.read ? "Oui" : "Non"}"`
     ]);
-    
     const csvContent = [headers, ...rows].map(row => row.join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -190,18 +191,15 @@ function Admin() {
     try {
       const token = localStorage.getItem('adminToken');
       const unreadMessages = messages.filter(m => !m.read);
-      
       if (unreadMessages.length === 0) {
         alert("Tous les messages sont déjà lus");
         return;
       }
-      
       for (const msg of unreadMessages) {
         await axios.put(`/api/admin/messages/${msg.id}`, { read: true }, {
           headers: { Authorization: `Bearer ${token}` }
         });
       }
-      
       alert(`${unreadMessages.length} message(s) marqué(s) comme lu`);
       fetchAllData();
     } catch (error) {
@@ -215,7 +213,6 @@ function Admin() {
     const formData = new FormData(e.target);
     const email = formData.get('email');
     const password = formData.get('password');
-    
     try {
       const response = await axios.post('/api/admin/login', { email, password });
       localStorage.setItem('adminToken', response.data.token);
@@ -355,7 +352,6 @@ function Admin() {
               <div><label className="block mb-1 font-medium">Image Cloudinary</label><input type="url" className="w-full p-2 border rounded dark:bg-gray-700" placeholder="https://res.cloudinary.com/..." value={formData.cloudinaryImage || ""} onChange={e => setFormData({...formData, cloudinaryImage: e.target.value})} /></div>
             </>
           );
-        
         case 'user':
           return (
             <>
@@ -496,7 +492,6 @@ function Admin() {
               >
                 <FontAwesomeIcon icon={tab.icon} />
                 <span>{tab.label}</span>
-                {tab.count !== undefined && <span className="ml-1 text-xs bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded-full">{tab.count}</span>}
               </button>
             ))}
           </div>
@@ -584,7 +579,7 @@ function Admin() {
                   <button onClick={markAllAsRead} className="border border-afi-green text-afi-green px-4 py-2 rounded text-sm">✓ Marquer tout lu</button>
                 </div>
               </div>
-              <div className="space-y-4" id="messagesList">
+              <div className="space-y-4">
                 {messages.length === 0 ? (
                   <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
                     <p className="text-gray-500">Aucun message</p>
@@ -615,15 +610,7 @@ function Admin() {
           {activeTab === 'testimonials' && (
             <div>
               <div className="flex justify-between items-center mb-4"><h2 className="text-xl font-bold">Témoignages clients</h2><button onClick={() => { setSelectedItem(null); setModalType('testimonial'); setShowModal(true); }} className="bg-afi-green text-white px-4 py-2 rounded"><FontAwesomeIcon icon={faPlus} className="mr-1" /> Ajouter</button></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{testimonials.map(t => (<div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between items-start"><div><div className="font-semibold">{t.name}</div><div className="text-sm text-gray-500">{t.role}</div></div>
-                    <div className="flex gap-2">
-                      <button onClick={() => { setSelectedItem(t); setModalType("testimonial"); setShowModal(true); }} className="text-blue-500 hover:text-blue-700">
-                        <FontAwesomeIcon icon={faEdit} />
-                      </button>
-                      <button onClick={() => setShowConfirmDelete({ id: t.id, type: "testimonial" })} className="text-red-500 hover:text-red-700">
-                        <FontAwesomeIcon icon={faTrash} />
-                      </button>
-                    </div></div><div className="mt-2 text-gray-600">{t.content}</div><div className="mt-2 text-afi-green">{'⭐'.repeat(t.rating || 5)}</div></div>))}</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{testimonials.map(t => (<div key={t.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4"><div className="flex justify-between items-start"><div><div className="font-semibold">{t.name}</div><div className="text-sm text-gray-500">{t.role}</div></div><div className="flex gap-2"><button onClick={() => { setSelectedItem(t); setModalType("testimonial"); setShowModal(true); }} className="text-blue-500 hover:text-blue-700"><FontAwesomeIcon icon={faEdit} /></button><button onClick={() => setShowConfirmDelete({ id: t.id, type: "testimonial" })} className="text-red-500 hover:text-red-700"><FontAwesomeIcon icon={faTrash} /></button></div></div><div className="mt-2 text-gray-600">{t.content}</div><div className="mt-2 text-afi-green">{'⭐'.repeat(t.rating || 5)}</div></div>))}</div>
             </div>
           )}
 
@@ -662,6 +649,9 @@ function Admin() {
               </div>
             </div>
           )}
+
+          {/* ✅ NOUVEAU : Onglet Demandes de rôle */}
+          {activeTab === 'role-requests' && <RoleRequestsAdmin />}
 
           {activeTab === 'settings' && (
             <div className="max-w-4xl mx-auto">

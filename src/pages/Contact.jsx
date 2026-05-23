@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+import API_URL from "../config/api";
 
 function Contact() {
   const [formData, setFormData] = useState({

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruck, faCreditCard, faMapMarkerAlt, faPhone, faEnvelope, faUser, faCheckCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+import API_URL from "../config/api";
 
 function Checkout() {
   const { items, total, clearCart } = useCart();

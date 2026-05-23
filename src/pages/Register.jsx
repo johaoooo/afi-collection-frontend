@@ -49,8 +49,8 @@ function Register() {
   const validateStep2 = () => {
     const newErrors = {};
     if (!formData.password) newErrors.password = 'Mot de passe requis';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     if (formData.password.length < 6) newErrors.password = 'Minimum 6 caractères';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -67,20 +67,49 @@ function Register() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // ✅ CORRIGÉ : appel réel à l'API
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateStep2()) return;
-    
+
     setIsLoading(true);
-    
-    setTimeout(() => {
-      localStorage.setItem('user', JSON.stringify({ 
-        email: formData.email, 
-        name: `${formData.firstName} ${formData.lastName}` 
-      }));
-      navigate('/');
+
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors({ general: data.message || "Erreur lors de l'inscription" });
+        return;
+      }
+
+      // Connexion automatique après inscription
+      localStorage.setItem('token', btoa(JSON.stringify({
+        id: data.user.id,
+        email: data.user.email,
+        role: data.user.role
+      })));
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      navigate('/dashboard');
+
+    } catch (error) {
+      setErrors({ general: "Erreur de connexion au serveur. Veuillez réessayer." });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const stepProgress = [
@@ -97,6 +126,7 @@ function Register() {
 
       <div className="min-h-[calc(100vh-80px)] py-8 px-4 bg-gradient-to-br from-afi-cream to-gray-100 dark:from-afi-dark-bg dark:to-gray-900">
         <div className="max-w-2xl mx-auto">
+
           {/* Progress Steps */}
           <div className="flex justify-center mb-8">
             {stepProgress.map((s, i) => (
@@ -137,6 +167,8 @@ function Register() {
             {/* Formulaire multi-étapes */}
             <div className="p-6">
               <AnimatePresence mode="wait">
+
+                {/* ÉTAPE 1 */}
                 {step === 1 && (
                   <motion.div
                     key="step1"
@@ -246,6 +278,7 @@ function Register() {
                   </motion.div>
                 )}
 
+                {/* ÉTAPE 2 */}
                 {step === 2 && (
                   <motion.div
                     key="step2"
@@ -255,6 +288,14 @@ function Register() {
                     transition={{ duration: 0.3 }}
                   >
                     <form onSubmit={handleSubmit} className="space-y-4">
+
+                      {/* ✅ Affichage erreur générale */}
+                      {errors.general && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm text-center">
+                          {errors.general}
+                        </div>
+                      )}
+
                       <div>
                         <label className="font-mono text-[10px] text-afi-green dark:text-afi-green tracking-wider block mb-2">
                           <FontAwesomeIcon icon={faLock} className="mr-1" /> MOT DE PASSE *

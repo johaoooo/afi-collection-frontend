@@ -12,7 +12,7 @@ import {
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+import API_URL from "../config/api";
 
 function CfpDorcas() {
   const [openFormation, setOpenFormation] = useState(null);

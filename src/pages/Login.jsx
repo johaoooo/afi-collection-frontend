@@ -7,7 +7,7 @@ import { faEnvelope, faLock, faEye, faEyeSlash, faArrowRight, faUserShield } fro
 import { faGoogle, faFacebookF } from '@fortawesome/free-brands-svg-icons';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+import API_URL from "../config/api";
 
 function Login() {
   const navigate = useNavigate();
@@ -37,42 +37,33 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
+  e.preventDefault();
+  setIsLoading(true);
+  setErrors({});
+  
+  try {
+    const response = await axios.post(`${API_URL}/login`, formData);
     
-    try {
-      const response = await axios.post(`${API_URL}/login`, formData);
-      
-      // Sauvegarder le token et les infos utilisateur
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('adminUser', JSON.stringify(response.data.user));
-      
-      if (rememberMe) {
-        localStorage.setItem('rememberedEmail', formData.email);
-      } else {
-        localStorage.removeItem('rememberedEmail');
-      }
-      
-      // Rediriger selon le rôle
-      const userRole = response.data.user?.role || 'client';
-      if (userRole === 'client') {
-        navigate('/dashboard');
-      } else {
-        navigate('/admin');
-      }
-    } catch (error) {
-      if (error.response?.status === 401) {
-        setErrors({ general: 'Email ou mot de passe incorrect' });
-      } else if (error.response?.status === 403) {
-        setErrors({ general: 'Compte désactivé' });
-      } else {
-        setErrors({ general: 'Erreur de connexion. Veuillez réessayer.' });
-      }
-    } finally {
-      setIsLoading(false);
+    // Sauvegarder le token
+    localStorage.setItem('token', response.data.token);
+    localStorage.setItem('adminUser', JSON.stringify(response.data.user));
+    
+    // Rediriger selon le rôle
+    if (response.data.user.role === 'client') {
+      navigate('/dashboard');
+    } else {
+      navigate('/admin');
     }
-  };
+  } catch (error) {
+    if (error.response?.status === 401) {
+      setErrors({ general: 'Email ou mot de passe incorrect' });
+    } else {
+      setErrors({ general: 'Erreur de connexion' });
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <>
