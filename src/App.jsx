@@ -1,3 +1,4 @@
+import Loader from './components/Loader';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -24,44 +25,48 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Checkout from "./pages/Checkout";
 import Admin from './pages/Admin';
+import DashboardClient from './pages/client/DashboardClient';
 
 function App() {
   return (
-    <HelmetProvider>
-      <ThemeProvider>
-        <CartProvider>
-          <Router>
-            <div className="min-h-screen bg-afi-cream dark:bg-afi-dark-bg transition-colors duration-300 flex flex-col">
-              <Navbar />
-              <CartPanel />
-              <main className="flex-grow">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/afisac" element={<Afisac />} />
-                  <Route path="/afi-textile" element={<AfiTextile />} />
-                  <Route path="/afi-mode" element={<AfiMode />} />
-                  <Route path="/agroalimentaire" element={<Agroalimentaire />} />
-                  <Route path="/cfp-dorcas" element={<CfpDorcas />} />
-                  <Route path="/fondatrice" element={<Fondatrice />} />
-                  <Route path="/foires" element={<Foires />} />
-                  <Route path="/don" element={<Don />} />
-                  <Route path="/galerie" element={<Galerie />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
-                  <Route path="/conditions-generales" element={<Terms />} />
-                  <Route path="/politique-confidentialite" element={<Privacy />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/admin" element={<Admin />} />
-                </Routes>
-              </main>
-              <Footer />
-            </div>
-          </Router>
-        </CartProvider>
-      </ThemeProvider>
-    </HelmetProvider>
+    <Loader>
+      <HelmetProvider>
+        <ThemeProvider>
+          <CartProvider>
+            <Router>
+              <div className="min-h-screen bg-afi-cream dark:bg-afi-dark-bg transition-colors duration-300 flex flex-col">
+                <Navbar />
+                <CartPanel />
+                <main className="flex-grow">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/afisac" element={<Afisac />} />
+                    <Route path="/afi-textile" element={<AfiTextile />} />
+                    <Route path="/afi-mode" element={<AfiMode />} />
+                    <Route path="/agroalimentaire" element={<Agroalimentaire />} />
+                    <Route path="/cfp-dorcas" element={<CfpDorcas />} />
+                    <Route path="/fondatrice" element={<Fondatrice />} />
+                    <Route path="/foires" element={<Foires />} />
+                    <Route path="/don" element={<Don />} />
+                    <Route path="/galerie" element={<Galerie />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/mot-de-passe-oublie" element={<ForgotPassword />} />
+                    <Route path="/conditions-generales" element={<Terms />} />
+                    <Route path="/politique-confidentialite" element={<Privacy />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/dashboard" element={<DashboardClient />} />
+                  </Routes>
+                </main>
+                <Footer />
+              </div>
+            </Router>
+          </CartProvider>
+        </ThemeProvider>
+      </HelmetProvider>
+    </Loader>
   );
 }
 
